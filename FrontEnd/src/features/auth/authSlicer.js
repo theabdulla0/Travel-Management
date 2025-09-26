@@ -40,6 +40,7 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
+
       localStorage.setItem("accessToken", action.payload.accessToken);
       localStorage.setItem("refreshToken", action.payload.refreshToken);
     });
@@ -62,8 +63,13 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      localStorage.clear();
+    });
+    builder.addCase(logout.rejected, (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.refreshToken = null;
+      localStorage.clear();
     });
   },
 });

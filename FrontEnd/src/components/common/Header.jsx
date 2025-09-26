@@ -1,10 +1,9 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
-import AuthModal  from "@/pages/auth/AuthModal";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "@/features/auth/authThunk";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,10 +13,14 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export default function Header() {
+export default function Header({ setOpenLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openLogin, setOpenLogin] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { refreshToken } = useSelector((state) => state.auth);
 
   const tripComponents = [
     { title: "Create Trip", href: "/create-trip" },
@@ -26,6 +29,19 @@ export default function Header() {
     { title: "Expenses", href: "/expenses" },
     { title: "Reports", href: "/reports" },
   ];
+
+  const handleProtectedClick = (path) => {
+    if (!user) {
+      setOpenLogin(true);
+      return;
+    }
+    navigate(path);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout(refreshToken));
+    navigate("/");
+  };
 
   return (
     <>
@@ -37,10 +53,13 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-4">
+          <nav className="hidden md:flex items-center w-full">
+            {/* Left Spacer */}
+            <div className="flex-1" />
+
+            {/* Centered Menu Items */}
             <NavigationMenu>
-              <NavigationMenuList>
-                {/* Home - no dropdown */}
+              <NavigationMenuList className="flex items-center space-x-6">
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
@@ -50,7 +69,6 @@ export default function Header() {
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
-                {/* Trips Dropdown */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>Trips</NavigationMenuTrigger>
                   <NavigationMenuContent>
@@ -58,12 +76,12 @@ export default function Header() {
                       {tripComponents.map((item) => (
                         <li key={item.href}>
                           <NavigationMenuLink asChild>
-                            <Link
-                              to={item.href}
-                              className="block px-2 py-1 hover:bg-gray-100 rounded"
+                            <button
+                              className="block px-2 py-1 hover:bg-gray-100 rounded text-left w-full"
+                              onClick={() => handleProtectedClick(item.href)}
                             >
                               {item.title}
-                            </Link>
+                            </button>
                           </NavigationMenuLink>
                         </li>
                       ))}
@@ -71,17 +89,6 @@ export default function Header() {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Profile */}
-                <NavigationMenuItem>
-                  <NavigationMenuLink
-                    asChild
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    <Link to="/profile">Profile</Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-
-                {/* About */}
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
@@ -91,7 +98,6 @@ export default function Header() {
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
-                {/* Contact Us */}
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
@@ -102,12 +108,51 @@ export default function Header() {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-          </nav>
 
-          {/* Desktop Sign In Button */}
-          <div className="hidden md:block">
-            <Button onClick={() => setOpenLogin(true)}>Sign In</Button>
-          </div>
+            {/* Right: Profile / Sign In */}
+            <div className="flex-1 flex justify-end">
+              {user ? (
+                <NavigationMenu>
+                  <NavigationMenuList>
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger>
+                        <Avatar>
+                          <AvatarImage src="https://github.com/shadcn.png" />
+                          <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <ul className="grid gap-2 w-[150px]">
+                          <li>
+                            <NavigationMenuLink asChild>
+                              <button
+                                className="block px-2 py-1 hover:bg-gray-100 rounded text-left w-full"
+                                onClick={() => navigate("/profile")}
+                              >
+                                Profile
+                              </button>
+                            </NavigationMenuLink>
+                          </li>
+                          <li>
+                            <NavigationMenuLink asChild>
+                              <button
+                                className="block px-2 py-1 hover:bg-gray-100 rounded text-left w-full"
+                                onClick={handleLogout}
+                              >
+                                Logout
+                              </button>
+                            </NavigationMenuLink>
+                          </li>
+                        </ul>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                  </NavigationMenuList>
+                </NavigationMenu>
+              ) : (
+                <Button onClick={() => setOpenLogin(true)}>Sign In</Button>
+              )}
+            </div>
+          </nav>
 
           {/* Mobile Hamburger */}
           <div className="md:hidden flex items-center">
@@ -132,52 +177,50 @@ export default function Header() {
                 Home
               </Link>
               {tripComponents.map((item) => (
-                <Link
+                <button
                   key={item.href}
-                  to={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="hover:text-gray-900 transition"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    handleProtectedClick(item.href);
+                  }}
+                  className="text-left hover:text-gray-900 transition w-full"
                 >
                   {item.title}
-                </Link>
+                </button>
               ))}
-              <Link
-                to="/profile"
-                onClick={() => setMobileOpen(false)}
-                className="hover:text-gray-900 transition"
-              >
-                Profile
-              </Link>
-              <Link
-                to="/about"
-                onClick={() => setMobileOpen(false)}
-                className="hover:text-gray-900 transition"
-              >
-                About
-              </Link>
-              <Link
-                to="/contact"
-                onClick={() => setMobileOpen(false)}
-                className="hover:text-gray-900 transition"
-              >
-                Contact Us
-              </Link>
-              <Button
-                className="w-full mt-2"
-                onClick={() => {
-                  setMobileOpen(false);
-                  setOpenLogin(true);
-                }}
-              >
-                Sign In
-              </Button>
+              {user ? (
+                <>
+                  <Link
+                    to="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="hover:text-gray-900 transition"
+                  >
+                    Profile
+                  </Link>
+                  <Button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  className="w-full mt-2"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setOpenLogin(true);
+                  }}
+                >
+                  Sign In
+                </Button>
+              )}
             </nav>
           </div>
         )}
       </header>
-
-      {/* Login Modal */}
-      <AuthModal open={openLogin} setOpen={setOpenLogin} />
     </>
   );
 }
