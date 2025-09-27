@@ -7,14 +7,14 @@ const authMiddleware = require("../middlewares/auth.middleware");
 router.post("/save-trip", authMiddleware, async (req, res) => {
   try {
     const { plan } = req.body;
-
+    console.log("SavePlan", plan);
     if (!plan) {
       return res.status(400).json({ message: "Trip details are required" });
     }
     console.log("Save trip before", plan);
     const newTrip = await Trip.create({
       tripDetails: JSON.stringify(plan),
-      createdBy: req.user.id,
+      createdBy: req.user._id,
     });
     console.log("Save trip before", newTrip);
 
