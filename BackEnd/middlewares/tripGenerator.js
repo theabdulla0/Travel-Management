@@ -45,6 +45,7 @@ Rules:
 - Keep text concise and usable in a UI.
 - Never return text outside the JSON object.
 `;
+
   try {
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -74,15 +75,15 @@ Rules:
     console.log("AI raw response:", text);
 
     try {
-      // Try direct JSON parse first
-      return JSON.parse(text);
-    } catch {
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         console.error("AI response does not contain valid JSON");
         throw new Error("No valid JSON found in AI response");
       }
-      return JSON.parse(jsonMatch[0]);
+      console.log("Trip Gen Res:", JSON.parse(jsonMatch));
+      return JSON.parse(jsonMatch);
+    } catch {
+      throw new Error("Failed to generate trip step" + text);
     }
   } catch (error) {
     console.error("TripGen Error:", error.response?.data || error.message);

@@ -118,7 +118,7 @@ function TripChatBot() {
         plan: allAnswers,
       });
 
-      const aiPlan = result.data.resp || "No response";
+      const aiPlan = result.data || "No response";
 
       console.log("AI Trip Plan:", aiPlan);
 

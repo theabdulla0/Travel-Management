@@ -6,7 +6,7 @@ const authMiddleware = require("../middlewares/auth.middleware");
 // Save AI trip plan
 router.post("/save-trip", authMiddleware, async (req, res) => {
   try {
-    // console.log("req.user:", req.user);
+
     const { plan } = req.body;
 
     if (!plan) {

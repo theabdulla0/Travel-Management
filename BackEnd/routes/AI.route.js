@@ -16,7 +16,7 @@ router.post("/ai-model", async (req, res) => {
 
     console.log("AI response:", result);
 
-    res.json(result);
+    return res.status(200).json(result);
   } catch (error) {
     console.error("Error in /ai-model route:", error);
     res.status(500).json({ error: error.message || "Internal server error" });
