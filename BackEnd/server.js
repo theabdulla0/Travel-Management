@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
+
 const connectDB = require("./config/db");
 const app = express();
 
@@ -10,6 +12,7 @@ const corsOptions = {
 };
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 // app.use("/api/ai", require("./routes/AI.route"));
 app.use("/api/auth", require("./routes/user.route"));

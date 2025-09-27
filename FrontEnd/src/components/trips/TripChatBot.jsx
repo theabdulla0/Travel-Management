@@ -123,14 +123,14 @@ function TripChatBot() {
       console.log("AI Trip Plan:", aiPlan);
 
       // Save to DB
-      await axios.post(
+      const tr = await axios.post(
         "http://localhost:3000/api/trip/save-trip",
         { plan: aiPlan },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+      console.log("Saved trip:", tr.data);
       setMessages((prev) => [
         ...prev.filter(
           (msg) =>

@@ -6,17 +6,17 @@ const authMiddleware = require("../middlewares/auth.middleware");
 // Save AI trip plan
 router.post("/save-trip", authMiddleware, async (req, res) => {
   try {
-
     const { plan } = req.body;
 
     if (!plan) {
       return res.status(400).json({ message: "Trip details are required" });
     }
-    console.log(plan);
+    console.log("Save trip before", plan);
     const newTrip = await Trip.create({
-      tripDetails: plan,
+      tripDetails: JSON.stringify(plan),
       createdBy: req.user.id,
     });
+    console.log("Save trip before", newTrip);
 
     res.status(201).json({ message: "Trip saved successfully", trip: newTrip });
   } catch (err) {

@@ -3,8 +3,6 @@ import { signup, login, refreshToken, getMe, logout } from "./authThunk";
 
 const initialState = {
   user: null,
-  accessToken: localStorage.getItem("accessToken") || null,
-  refreshToken: localStorage.getItem("refreshToken") || null,
   loading: false,
   error: null,
 };
@@ -25,10 +23,6 @@ const authSlice = createSlice({
     builder.addCase(signup.fulfilled, (state, action) => {
       state.loading = false;
       state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
-      localStorage.setItem("accessToken", action.payload.accessToken);
-      localStorage.setItem("refreshToken", action.payload.refreshToken);
     });
     builder.addCase(signup.rejected, (state, action) => {
       state.loading = false;
@@ -38,19 +32,12 @@ const authSlice = createSlice({
     // Login
     builder.addCase(login.fulfilled, (state, action) => {
       state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
-
-      localStorage.setItem("accessToken", action.payload.accessToken);
-      localStorage.setItem("refreshToken", action.payload.refreshToken);
     });
 
     // Refresh Token
     builder.addCase(refreshToken.fulfilled, (state, action) => {
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
-      localStorage.setItem("accessToken", action.payload.accessToken);
-      localStorage.setItem("refreshToken", action.payload.refreshToken);
     });
 
     // Get Me
@@ -61,15 +48,9 @@ const authSlice = createSlice({
     // Logout
     builder.addCase(logout.fulfilled, (state) => {
       state.user = null;
-      state.accessToken = null;
-      state.refreshToken = null;
-      localStorage.clear();
     });
     builder.addCase(logout.rejected, (state) => {
       state.user = null;
-      state.accessToken = null;
-      state.refreshToken = null;
-      localStorage.clear();
     });
   },
 });

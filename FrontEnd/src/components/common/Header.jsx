@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
@@ -14,6 +14,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getMe } from "../../features/auth/authThunk";
 
 export default function Header({ setOpenLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -30,6 +31,12 @@ export default function Header({ setOpenLogin }) {
     { title: "Reports", href: "/reports" },
   ];
 
+  useEffect(() => {
+    if (!user) {
+      dispatch(getMe());
+    }
+  }, [dispatch, user]);
+  
   const handleProtectedClick = (path) => {
     if (!user) {
       setOpenLogin(true);
