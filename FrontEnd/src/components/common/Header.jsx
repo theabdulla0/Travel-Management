@@ -18,10 +18,11 @@ import { getMe } from "../../features/auth/authThunk";
 
 export default function Header({ setOpenLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user } = useSelector((state) => state.auth);
+  const { user, refreshToken, hasFetchedUser } = useSelector(
+    (state) => state.auth
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { refreshToken } = useSelector((state) => state.auth);
 
   const tripComponents = [
     { title: "Create Trip", href: "/create-trip" },
@@ -32,11 +33,11 @@ export default function Header({ setOpenLogin }) {
   ];
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !hasFetchedUser) {
       dispatch(getMe());
     }
-  }, [dispatch, user]);
-  
+  }, [dispatch, user, hasFetchedUser]);
+
   const handleProtectedClick = (path) => {
     if (!user) {
       setOpenLogin(true);

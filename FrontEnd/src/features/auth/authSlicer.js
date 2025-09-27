@@ -4,11 +4,13 @@ import { signup, login, refreshToken, getMe, logout } from "./authThunk";
 const initialState = {
   user: null,
   loading: false,
+  hasFetchedUser: false,
   error: null,
 };
 
 const authSlice = createSlice({
   name: "auth",
+
   initialState,
   reducers: {
     clearError: (state) => {
@@ -43,8 +45,11 @@ const authSlice = createSlice({
     // Get Me
     builder.addCase(getMe.fulfilled, (state, action) => {
       state.user = action.payload;
+      state.hasFetchedUser = true;
     });
-
+    builder.addCase(getMe.rejected, (state) => {
+      state.hasFetchedUser = true;
+    });
     // Logout
     builder.addCase(logout.fulfilled, (state) => {
       state.user = null;
