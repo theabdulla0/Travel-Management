@@ -13,17 +13,12 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { login, signup } from "../../features/auth/authThunk";
 import { Link } from "react-router-dom";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function AuthModal({ open, setOpen }) {
   const [tab, setTab] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("spawn@gmail.com ");
+  const [password, setPassword] = useState("Hello@123");
   const [name, setName] = useState("");
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth);
@@ -96,8 +91,8 @@ function AuthModal({ open, setOpen }) {
             </Button>
 
             <div className="my-6 text-center text-gray-400 relative">
-              <span className="bg-white px-3">OR</span>
-              <div className="absolute top-1/2 left-0 w-full border-t border-gray-300 z-0"></div>
+              <span className="px-3">OR</span>
+              <div className="absolute top-1/2 left-0 w-full border-t z-0"></div>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
@@ -141,8 +136,8 @@ function AuthModal({ open, setOpen }) {
             </Button>
 
             <div className="my-6 text-center text-gray-400 relative">
-              <span className="bg-white px-3">OR</span>
-              <div className="absolute top-1/2 left-0 w-full border-t border-gray-300 z-0"></div>
+              <span className=" px-3">OR</span>
+              <div className="absolute top-1/2 left-0 w-full border-t  z-0"></div>
             </div>
 
             <form onSubmit={handleRegister} className="space-y-4">

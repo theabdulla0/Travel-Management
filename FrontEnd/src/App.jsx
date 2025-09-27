@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/user/Home";
-import CreateTrip from "./components/trips/CreateTrip";
+import CreateTrip from "./pages/trips/CreateTrip";
 import { Toaster } from "./components/ui/sonner";
 import PasswordPassword from "./pages/auth/PasswordForgot";
 import { React, useEffect } from "react";

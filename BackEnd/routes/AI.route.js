@@ -1,27 +1,26 @@
 const express = require("express");
 const router = express.Router();
-const { generateTripItinerary } = require("../utils/AIGenraret");
+const { TripGen } = require("../middlewares/tripGenerator");
 
-router.post("/generate", async (req, res) => {
-  const { destination, days, budget, travelStyle } = req.body;
-  if (!destination || !days || !budget || !travelStyle) {
-    return res.status(400).json({
-      error:
-        "Missing one or more required fields: destination, days, budget, travelStyle",
-    });
-  }
+router.post("/ai-model", async (req, res) => {
   try {
-    const itinerary = await generateTripItinerary({
-      destination,
-      days,
-      budget,
-      travelStyle,
-    });
-    res.status(200).json(itinerary);
-  } catch (err) {
-    console.error("AI Generation Error:", err);
+    const { plan } = req.body;
 
-    res.status(500).json({ error: "Failed to generate trip itinerary." });
+    if (!plan) {
+      return res.status(400).json({ error: "Missing 'plan' in request body" });
+    }
+
+    console.log("Received plan from frontend:", plan);
+
+    const result = await TripGen(plan);
+
+    console.log("AI response:", result);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error in /ai-model route:", error);
+    res.status(500).json({ error: error.message || "Internal server error" });
   }
 });
+
 module.exports = router;

@@ -1,3 +1,6 @@
+import { FaGlobeAmericas } from "react-icons/fa";
+import { FaLandmark, FaPlane } from "react-icons/fa6";
+import { HiMiniGlobeAsiaAustralia } from "react-icons/hi2";
 export const SelectTravelersList = [
   {
     id: 1,
@@ -50,4 +53,25 @@ export const SelectBudgetOptions = [
   },
 ];
 
-
+export const SelectTravelSuggestionsOptions = [
+  {
+    id: 1,
+    title: "Create New Trip",
+    icon: <FaGlobeAmericas size={40} className="text-[#08CB00]" />,
+  },
+  {
+    id: 2,
+    title: "Inspire me where to go",
+    icon: <FaPlane size={40} className="text-[#cb0000]" />,
+  },
+  {
+    id: 3,
+    title: "Discover hidden gems",
+    icon: <FaLandmark size={40} className="text-[#0022cb]" />,
+  },
+  {
+    id: 4,
+    title: "Adventure trips",
+    icon: <HiMiniGlobeAsiaAustralia size={40} className="text-[#cb00c8]" />,
+  },
+];

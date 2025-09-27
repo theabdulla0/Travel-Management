@@ -10,7 +10,7 @@ const profileSchema = new mongoose.Schema({
   city: { type: String, trim: true, maxLength: 50 },
   state: { type: String, trim: true, maxLength: 50 },
   country: { type: String, trim: true, maxLength: 50 },
-  pincode: {
+  pinCode: {
     type: String,
     trim: true,
     match: [/^[0-9]{4,10}$/, "Please enter a valid pinCode"],
