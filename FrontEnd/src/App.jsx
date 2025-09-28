@@ -7,6 +7,7 @@ import { React, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMe } from "./features/auth/authThunk";
 import Profile from "./pages/user/Profile";
+import ViewUserAllTrips from "./pages/trips/ViewUserAllTrips";
 function App() {
   const dispatch = useDispatch();
   const { user, loading } = useSelector((state) => state.auth);
@@ -19,6 +20,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/create-trip" element={<CreateTrip />} />
+        <Route path="/trips" element={<ViewUserAllTrips />} />
         <Route path="/forgot-password" element={<PasswordPassword />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>

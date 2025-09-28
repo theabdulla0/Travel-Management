@@ -7,19 +7,14 @@ function ViewTrip({ trip }) {
   const [expandedDay, setExpandedDay] = useState(null);
 
   useEffect(() => {
-    console.log(
-      "ViewTrip: trip prop received at",
-      new Date().toLocaleString(),
-      ":",
-      trip
-    );
+    console.log(trip.itinerary[0].activities[0].image);
+
   }, [trip]);
 
   const toggleDay = (day) => {
     setExpandedDay(expandedDay === day ? null : day);
   };
 
-  // Check if trip data is invalid or missing
   if (!trip || trip.error) {
     return (
       <div className="p-6 max-w-5xl mx-auto space-y-8 text-center">
@@ -34,7 +29,6 @@ function ViewTrip({ trip }) {
     );
   }
 
-  // Validate required fields
   const requiredFields = [
     "tripTitle",
     "startingPoint",
@@ -55,7 +49,6 @@ function ViewTrip({ trip }) {
     console.error(
       "ViewTrip: Invalid trip data at",
       new Date().toLocaleString(),
-      ":",
       {
         missingFields,
         itineraryIsArray: Array.isArray(trip.itinerary),
@@ -69,7 +62,7 @@ function ViewTrip({ trip }) {
         </h2>
         <p className="text-gray-600">
           The trip plan is missing required fields: {missingFields.join(", ")}{" "}
-          or has invalid data. Please try generating the trip again.
+          or has invalid data.
         </p>
       </div>
     );
@@ -103,8 +96,10 @@ function ViewTrip({ trip }) {
             <strong>From:</strong> {trip.startingPoint}
           </p>
           <p>
-            <strong>To:</strong> {trip.destination}
+            <strong>To:</strong>{" "}
+            {`${trip.destination?.city}, ${trip.destination?.country}`}
           </p>
+
           <p>
             <strong>Duration:</strong> {trip.durationDays} days
           </p>
@@ -126,7 +121,6 @@ function ViewTrip({ trip }) {
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold text-gray-800">Itinerary</h2>
         <div className="relative">
-          {/* Vertical timeline for md+ screens */}
           <div className="hidden md:block absolute left-5 top-0 h-full w-1 bg-green-600 rounded"></div>
 
           {trip.itinerary.map((day) => (
@@ -134,13 +128,11 @@ function ViewTrip({ trip }) {
               key={day.day}
               className="relative mb-8 pl-0 md:pl-12 flex flex-col md:block"
             >
-              {/* Timeline dot */}
               <div className="absolute md:left-2.5 top-2 w-5 h-5 bg-green-600 rounded-full border-2 border-white"></div>
 
-              {/* Day Card */}
               <div className="border rounded-lg shadow-sm bg-white overflow-hidden mt-6 md:mt-0">
                 <button
-                  className="flex justify-between items-center w-full px-4 py-3 text-left font-semibold text-gray-800 hover:bg-gray-50 focus:outline-none"
+                  className="flex justify-between items-center w-full px-4 py-3 text-left font-semibold text-gray-800 hover:bg-gray-50"
                   onClick={() => toggleDay(day.day)}
                 >
                   <span>
@@ -153,25 +145,94 @@ function ViewTrip({ trip }) {
                   )}
                 </button>
                 {expandedDay === day.day && (
-                  <div className="px-6 py-4 text-gray-700 space-y-2 bg-gray-50">
-                    <div className="space-y-1">
+                  <div className="px-6 py-4 text-gray-700 space-y-4 bg-gray-50">
+                    {/* Activities */}
+                    <div>
                       <strong>Activities:</strong>
-                      <ul className="list-disc ml-5">
+                      <ul className="list-disc ml-5 space-y-2">
                         {day.activities.map((act, i) => (
-                          <li key={i}>{act}</li>
+                          <li key={i}>
+                            <p className="font-medium">{act.name}</p>
+                            <p className="text-sm text-gray-600">
+                              {act.description}
+                            </p>
+                            {act.image && (
+                              <img
+                                src={act.image}
+                                alt={act.name}
+                                className="mt-1 w-40 h-24 object-cover rounded"
+                              />
+                            )}
+                            {act.mapLink && (
+                              <a
+                                href={act.mapLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 underline text-sm"
+                              >
+                                View on Map
+                              </a>
+                            )}
+                          </li>
                         ))}
                       </ul>
                     </div>
-                    <p>
-                      <strong>Hotel:</strong>{" "}
-                      <span className="text-green-600">{day.hotel}</span>
-                    </p>
-                    <p>
-                      <strong>Meals:</strong>{" "}
-                      <span className="text-blue-600">
-                        {day.meals.join(", ")}
-                      </span>
-                    </p>
+
+                    {/* Hotel */}
+                    {day.hotel && (
+                      <div>
+                        <strong>Hotel:</strong>
+                        <p className="text-green-600">{day.hotel.name}</p>
+                        {day.hotel.image && (
+                          <img
+                            src={day.hotel.image}
+                            alt={day.hotel.name}
+                            className="mt-1 w-40 h-24 object-cover rounded"
+                          />
+                        )}
+                        {day.hotel.mapLink && (
+                          <a
+                            href={day.hotel.mapLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 underline text-sm"
+                          >
+                            View on Map
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Meals */}
+                    {day.meals?.length > 0 && (
+                      <div>
+                        <strong>Meals:</strong>
+                        <ul className="list-disc ml-5 space-y-2">
+                          {day.meals.map((meal, i) => (
+                            <li key={i}>
+                              <p className="text-blue-600">{meal.name}</p>
+                              {meal.image && (
+                                <img
+                                  src={meal.image}
+                                  alt={meal.name}
+                                  className="mt-1 w-32 h-20 object-cover rounded"
+                                />
+                              )}
+                              {meal.mapLink && (
+                                <a
+                                  href={meal.mapLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 underline text-sm"
+                                >
+                                  View on Map
+                                </a>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -181,28 +242,74 @@ function ViewTrip({ trip }) {
       </div>
 
       {/* Recommendations */}
-      <div className="bg-white p-6 rounded-lg shadow-md space-y-3">
+      <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
         <h2 className="text-2xl font-semibold text-gray-800">
           Recommendations
         </h2>
-        <p>
-          <strong>Hotels:</strong>{" "}
-          <span className="text-green-600">
-            {trip.recommendations.hotels.join(", ")}
-          </span>
-        </p>
-        <p>
-          <strong>Restaurants:</strong>{" "}
-          <span className="text-orange-500">
-            {trip.recommendations.restaurants.join(", ")}
-          </span>
-        </p>
-        <p>
-          <strong>Travel Tips:</strong>{" "}
-          <span className="text-gray-700">
-            {trip.recommendations.travelTips.join("; ")}
-          </span>
-        </p>
+        <div>
+          <strong>Hotels:</strong>
+          <ul className="list-disc ml-5 space-y-2">
+            {trip.recommendations.hotels.map((hotel, i) => (
+              <li key={i}>
+                <p className="text-green-600">{hotel.name}</p>
+                {hotel.image && (
+                  <img
+                    src={hotel.image}
+                    alt={hotel.name}
+                    className="mt-1 w-32 h-20 object-cover rounded"
+                  />
+                )}
+                {hotel.mapLink && (
+                  <a
+                    href={hotel.mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline text-sm"
+                  >
+                    View on Map
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <strong>Restaurants:</strong>
+          <ul className="list-disc ml-5 space-y-2">
+            {trip.recommendations.restaurants.map((rest, i) => (
+              <li key={i}>
+                <p className="text-orange-500">{rest.name}</p>
+                {rest.image && (
+                  <img
+                    src={rest.image}
+                    alt={rest.name}
+                    className="mt-1 w-32 h-20 object-cover rounded"
+                  />
+                )}
+                {rest.mapLink && (
+                  <a
+                    href={rest.mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline text-sm"
+                  >
+                    View on Map
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <strong>Travel Tips:</strong>
+          <ul className="list-disc ml-5">
+            {trip.recommendations.travelTips.map((tip, i) => (
+              <li key={i}>{tip}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
