@@ -3,21 +3,15 @@ import Home from "./pages/user/Home";
 import CreateTrip from "./pages/trips/CreateTrip";
 import { Toaster } from "./components/ui/sonner";
 import PasswordPassword from "./pages/auth/PasswordForgot";
-import { React, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getMe } from "./features/auth/authThunk";
+import { React } from "react";
 import Profile from "./pages/user/Profile";
 import ViewUserAllTrips from "./pages/trips/ViewUserAllTrips";
+import NotFoundPage from "./pages/NotFoundPage";
 function App() {
-  const dispatch = useDispatch();
-  const { user, loading } = useSelector((state) => state.auth);
-  useEffect(() => {
-    dispatch(getMe());
-  }, [dispatch]);
-
   return (
     <div>
       <Routes>
+        <Route path="*" element={<NotFoundPage />} />
         <Route path="/" element={<Home />} />
         <Route path="/create-trip" element={<CreateTrip />} />
         <Route path="/trips" element={<ViewUserAllTrips />} />
