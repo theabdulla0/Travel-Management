@@ -209,7 +209,7 @@ POST /api/ai
 
 ### Save Trip
 ```http
-POST /api/trip/trip-save
+POST /api/trip/save-trip
 ```
 Requires authentication. Saves the generated trip to the database.
 
