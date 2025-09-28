@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
@@ -16,7 +16,6 @@ app.use(cookieParser());
 
 app.use("/api/auth", require("./routes/user.route"));
 app.use("/api/trip", require("./routes/trip.route"));
-app.use("/api", require("./routes/AI.route"));
 app.use("/api", require("./routes/image.route"));
 
 app.use((req, res) => {

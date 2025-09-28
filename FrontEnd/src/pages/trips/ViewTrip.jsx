@@ -6,11 +6,6 @@ import { FaPerson } from "react-icons/fa6";
 function ViewTrip({ trip }) {
   const [expandedDay, setExpandedDay] = useState(null);
 
-  useEffect(() => {
-    console.log(trip.itinerary[0].activities[0].image);
-
-  }, [trip]);
-
   const toggleDay = (day) => {
     setExpandedDay(expandedDay === day ? null : day);
   };

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { IoSend } from "react-icons/io5";
-import axios from "axios";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
+import TripAPI from "@/api/tripAPI";
 
 function TripChatBot({ setTripPlan }) {
   const [messages, setMessages] = useState([]);
@@ -41,12 +41,6 @@ function TripChatBot({ setTripPlan }) {
     { text: "Any special requirements or preferences?" },
   ];
 
-  useEffect(() => {
-    if (messages.length) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
   const LoadingDots = () => (
     <div className="flex space-x-1 animate-pulse">
       <span className="w-2 h-2 bg-gray-700 rounded-full"></span>
@@ -66,50 +60,21 @@ function TripChatBot({ setTripPlan }) {
   const submitAllAnswers = async (allAnswers) => {
     try {
       setLoading(true);
+
       // Generate trip plan
-      console.log(
-        "TripChatBot: Sending to /api/ai at",
-        new Date().toLocaleString(),
-        ":",
-        { plan: allAnswers }
-      );
-      const response = await axios.post("http://localhost:3000/api/ai", {
-        plan: allAnswers,
-      }); // Cookies sent automatically
+      const response = await TripAPI.post("/ai", { plan: allAnswers });
       const aiPlan = response.data || {
         error: "No trip plan received from server.",
       };
-      console.log(
-        "TripChatBot: Received from /api/ai at",
-        new Date().toLocaleString(),
-        ":",
-        aiPlan
-      );
 
-      // Update parent component with trip plan
       setTripPlan(aiPlan);
 
       // Save trip plan to database
       try {
-        const saveResponse = await axios.post(
-          "http://localhost:3000/api/trip/save-trip",
-          {
-            plan: aiPlan,
-          },
-          { withCredentials: true }
-        ); // Cookies sent automatically
-        console.log(saveResponse.data);
+        const saveResponse = await TripAPI.post("/save-trip", { plan: aiPlan });
+        console.log("Trip saved:", saveResponse.data);
       } catch (saveErr) {
-        console.error(
-          "TripChatBot: Failed to save trip at",
-          new Date().toLocaleString(),
-          ":",
-          {
-            message: saveErr.message,
-            response: saveErr.response?.data,
-            status: saveErr.response?.status,
-          }
-        );
+        console.error("Failed to save trip:", saveErr.response?.data);
         setMessages((prev) => [
           ...prev,
           {
@@ -120,11 +85,12 @@ function TripChatBot({ setTripPlan }) {
         ]);
       }
 
-      setMessages((prev) => [
-        ...prev.filter(
+      // Remove "generating" placeholder
+      setMessages((prev) =>
+        prev.filter(
           (msg) => !msg.content.includes("generating the best possible trip")
-        ),
-      ]);
+        )
+      );
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -173,6 +139,11 @@ function TripChatBot({ setTripPlan }) {
     setExpandedDay(expandedDay === day ? null : day);
   };
 
+  // auto-scroll to bottom when messages update
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   if (!started) {
     return (
       <div className="h-[80vh] flex flex-col items-center gap-4 p-4">
@@ -196,7 +167,9 @@ function TripChatBot({ setTripPlan }) {
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex mt-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex mt-3 ${
+              msg.role === "user" ? "justify-end" : "justify-start"
+            }`}
           >
             <div
               className={`max-w-[70%] px-4 py-2 rounded-xl shadow-sm ${
@@ -205,6 +178,7 @@ function TripChatBot({ setTripPlan }) {
                   : "bg-gray-200 text-gray-800 rounded-bl-none"
               }`}
             >
+              <div>{msg.content}</div>
               <span className="block text-xs text-gray-500 mt-1">
                 {new Date().toLocaleTimeString([], {
                   hour: "2-digit",
