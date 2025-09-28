@@ -18,9 +18,7 @@ import { getMe } from "../../features/auth/authThunk";
 
 export default function Header({ setOpenLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, refreshToken, hasFetchedUser } = useSelector(
-    (state) => state.auth
-  );
+  const { user, hasFetchedUser } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -33,10 +31,11 @@ export default function Header({ setOpenLogin }) {
   ];
 
   useEffect(() => {
-    if (!user && !hasFetchedUser) {
+    if (!hasFetchedUser) {
       dispatch(getMe());
     }
-  }, [dispatch, user, hasFetchedUser]);
+    console.log("Header object:", hasFetchedUser);
+  }, [dispatch, hasFetchedUser]);
 
   const handleProtectedClick = (path) => {
     if (!user) {
@@ -47,7 +46,7 @@ export default function Header({ setOpenLogin }) {
   };
 
   const handleLogout = () => {
-    dispatch(logout(refreshToken));
+    dispatch(logout());
     navigate("/");
   };
 

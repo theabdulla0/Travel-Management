@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,11 +23,11 @@ export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name || "");
-  const [phone, setPhone] = useState(user?.profile?.phone || "");
+  const [name, setName] = useState(user?.user.name || "");
+  const [phone, setPhone] = useState(user?.user.profile?.phone || "");
 
   const handleUpdate = () => {
-    dispatch(updateProfile({ name, phone }))
+    dispatch(updateProfile({ name, email, phone }))
       .unwrap()
       .then(() => toast.success("Profile updated successfully"))
       .catch(() => toast.error("Failed to update profile"));
@@ -68,7 +68,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <Label className="mb-2">Email</Label>
-                  <Input value={user?.email} disabled />
+                  <Input value={user?.user.email} disabled />
                 </div>
                 <div>
                   <Label className="mb-2">Phone</Label>

@@ -6,9 +6,7 @@ export const signup = createAsyncThunk(
   "auth/signup",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await API.post("/signup", formData, {
-        withCredentials: true,
-      });
+      const res = await API.post("/signup", formData);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Signup failed");
@@ -21,7 +19,8 @@ export const login = createAsyncThunk(
   "auth/login",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await API.post("/login", formData, { withCredentials: true });
+      const res = await API.post("/login", formData);
+      console.log(res.data);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Login failed");
@@ -47,7 +46,8 @@ export const getMe = createAsyncThunk(
   "auth/getMe",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await API.get("/me", { withCredentials: true });
+      const res = await API.get("/me");
+      console.log("getme", res.data);
       return res.data;
     } catch (err) {
       return rejectWithValue("Failed to fetch user");
@@ -58,10 +58,9 @@ export const getMe = createAsyncThunk(
 // Logout
 export const logout = createAsyncThunk(
   "auth/logout",
-  async (_, { getState, rejectWithValue }) => {
-    const refreshToken = getState().auth.refreshToken;
+  async (_, { rejectWithValue }) => {
     try {
-      await API.post("/logout", { token: refreshToken });
+      await API.post("/logout", { withCredentials: true });
       return true;
     } catch (err) {
       return rejectWithValue("Logout failed");

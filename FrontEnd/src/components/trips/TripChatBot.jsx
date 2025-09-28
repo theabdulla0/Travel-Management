@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { IoSend } from "react-icons/io5";
-import { HiChevronDown, HiChevronUp } from "react-icons/hi";
-import TripAPI from "@/api/tripAPI";
+import { SaveTrip, AiGenerateTrip } from "../../features/trips/tripThunk";
+import { useDispatch } from "react-redux";
 
 function TripChatBot({ setTripPlan }) {
   const [messages, setMessages] = useState([]);
@@ -14,6 +14,8 @@ function TripChatBot({ setTripPlan }) {
   const [answers, setAnswers] = useState([]);
   const [expandedDay, setExpandedDay] = useState(null);
   const messagesEndRef = useRef(null);
+
+  const dispatch = useDispatch();
 
   const questions = [
     { text: "Where are you starting from?" },
@@ -62,16 +64,13 @@ function TripChatBot({ setTripPlan }) {
       setLoading(true);
 
       // Generate trip plan
-      const response = await TripAPI.post("/ai", { plan: allAnswers });
-      const aiPlan = response.data || {
-        error: "No trip plan received from server.",
-      };
-
+      const aiPlan = await dispatch(AiGenerateTrip(allAnswers)).unwrap();
+      console.log("AI Plan:", aiPlan);
       setTripPlan(aiPlan);
 
       // Save trip plan to database
       try {
-        const saveResponse = await TripAPI.post("/save-trip", { plan: aiPlan });
+        const saveResponse = await dispatch(SaveTrip(aiPlan)).unwrap();
         console.log("Trip saved:", saveResponse.data);
       } catch (saveErr) {
         console.error("Failed to save trip:", saveErr.response?.data);

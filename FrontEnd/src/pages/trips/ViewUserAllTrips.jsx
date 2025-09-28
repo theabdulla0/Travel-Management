@@ -12,11 +12,13 @@ import LayoutCommon from "../../components/common/LayoutCommon";
 
 function ViewUserAllTrips() {
   const dispatch = useDispatch();
-  const { trip, loading, error } = useSelector((state) => state.trip);
+  const { tripPlan, loading, error } = useSelector((state) => state.trip);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(ViewTrips());
-  }, [dispatch]); // Only run once on mount
+    console.log(tripPlan);
+  }, [dispatch]);
 
   if (loading) {
     return <p className="text-center mt-10 text-gray-500">Loading trips...</p>;
@@ -26,14 +28,14 @@ function ViewUserAllTrips() {
     return <p className="text-center mt-10 text-red-500">Error: {error}</p>;
   }
 
-  if (!trip || trip.length === 0) {
+  if (!tripPlan || tripPlan.length === 0) {
     return <p className="text-center mt-10 text-gray-500">No trips found.</p>;
   }
 
   return (
     <LayoutCommon>
       <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {trip.map((trip) => (
+        {tripPlan.map((trip) => (
           <Card key={trip._id} className="shadow-lg hover:shadow-xl transition">
             <CardHeader>
               <CardTitle>

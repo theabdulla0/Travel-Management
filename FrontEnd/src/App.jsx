@@ -7,6 +7,7 @@ import { React } from "react";
 import Profile from "./pages/user/Profile";
 import ViewUserAllTrips from "./pages/trips/ViewUserAllTrips";
 import NotFoundPage from "./pages/NotFoundPage";
+
 function App() {
   return (
     <div>

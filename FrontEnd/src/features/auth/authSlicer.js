@@ -19,44 +19,55 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     // Signup
-    builder.addCase(signup.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(signup.fulfilled, (state, action) => {
-      state.loading = false;
-      state.user = action.payload.user;
-    });
-    builder.addCase(signup.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    });
+    builder
+      .addCase(signup.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(signup.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.data;
+      })
+      .addCase(signup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
-    // Login
-    builder.addCase(login.fulfilled, (state, action) => {
-      state.user = action.payload.user;
-    });
+      // Login
+      .addCase(login.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.data;
+      })
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
-    // Refresh Token
-    builder.addCase(refreshToken.fulfilled, (state, action) => {
-      state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
-    });
+      // Refresh Token
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+      })
 
-    // Get Me
-    builder.addCase(getMe.fulfilled, (state, action) => {
-      state.user = action.payload;
-      state.hasFetchedUser = true;
-    });
-    builder.addCase(getMe.rejected, (state) => {
-      state.hasFetchedUser = true;
-    });
-    // Logout
-    builder.addCase(logout.fulfilled, (state) => {
-      state.user = null;
-    });
-    builder.addCase(logout.rejected, (state) => {
-      state.user = null;
-    });
+      // Get Me
+      .addCase(getMe.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.hasFetchedUser = true;
+      })
+      .addCase(getMe.rejected, (state) => {
+        state.hasFetchedUser = true;
+      })
+      // Logout
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.hasFetchedUser = true;
+      })
+      .addCase(logout.rejected, (state) => {
+        state.user = null;
+        state.hasFetchedUser = true;
+      });
   },
 });
 

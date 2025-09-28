@@ -2,8 +2,6 @@ const Trip = require("../models/trip.model");
 const User = require("../models/user.model");
 const { ApiResponse } = require("../utils/ApiResponse");
 
-
-
 const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -114,11 +112,6 @@ const generateAiPlanner = async (req, res) => {
   }
 };
 
-
-
-
-
-
 const SaveTrips = async (req, res) => {
   try {
     const { plan } = req.body;
@@ -164,4 +157,4 @@ const ViewAllUserTrips = async (req, res) => {
   }
 };
 
-module.exports = { ViewAllUserTrips, SaveTrips,generateAiPlanner };
+module.exports = { ViewAllUserTrips, SaveTrips, generateAiPlanner };

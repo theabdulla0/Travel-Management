@@ -19,7 +19,7 @@ app.use("/api/trip", require("./routes/trip.route"));
 app.use("/api", require("./routes/image.route"));
 
 app.use((req, res) => {
-  console.log("404! Page not Found");
+  res.send("404! Page not Found");
 });
 
 const PORT = process.env.PORT || 8000;

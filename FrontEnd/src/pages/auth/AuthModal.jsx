@@ -24,34 +24,37 @@ function AuthModal({ open, setOpen }) {
   const { loading } = useSelector((state) => state.auth);
 
   // --- Handlers ---
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Please enter both email and password.");
       return;
     }
-    dispatch(login({ email, password }))
-      .unwrap()
-      .then(() => {
-        toast.success("Logged in successfully!");
-        setOpen(false);
-      })
-      .catch((err) => toast.error(err));
+    try {
+      await dispatch(login({ email, password })).unwrap();
+
+      toast.success("Logged in successfully!");
+      setOpen(false);
+    } catch (err) {
+      toast.error(err);
+    }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (!name || !email || !password) {
       toast.error("Please fill all fields.");
       return;
     }
-    dispatch(signup({ name, email, password }))
-      .unwrap()
-      .then(() => {
-        toast.success("Account created!");
-        setOpen(false);
-      })
-      .catch((err) => toast.error(err));
+    try {
+      await dispatch(signup({ name, email, password })).unwrap();
+      // dispatch(getMe()).unwrap();
+      toast.success("Account created!");
+      setOpen(false);
+    } catch {
+      toast.error("Account creation failed.");
+      toast.error(err);
+    }
   };
 
   const googleLogin = () => {
