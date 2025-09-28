@@ -29,7 +29,14 @@ function TripChatBot({ setTripPlan }) {
     { text: "How many days will you travel?" },
     {
       text: "What are your interests?",
-      options: ["Adventure", "Sightseeing", "Cultural", "Food", "Nightlife", "Relaxation"],
+      options: [
+        "Adventure",
+        "Sightseeing",
+        "Cultural",
+        "Food",
+        "Nightlife",
+        "Relaxation",
+      ],
     },
     { text: "Any special requirements or preferences?" },
   ];
@@ -60,48 +67,72 @@ function TripChatBot({ setTripPlan }) {
     try {
       setLoading(true);
       // Generate trip plan
-      console.log("TripChatBot: Sending to /api/ai at", new Date().toLocaleString(), ":", { plan: allAnswers });
+      console.log(
+        "TripChatBot: Sending to /api/ai at",
+        new Date().toLocaleString(),
+        ":",
+        { plan: allAnswers }
+      );
       const response = await axios.post("http://localhost:3000/api/ai", {
         plan: allAnswers,
       }); // Cookies sent automatically
-      const aiPlan = response.data || { error: "No trip plan received from server." };
-      console.log("TripChatBot: Received from /api/ai at", new Date().toLocaleString(), ":", aiPlan);
+      const aiPlan = response.data || {
+        error: "No trip plan received from server.",
+      };
+      console.log(
+        "TripChatBot: Received from /api/ai at",
+        new Date().toLocaleString(),
+        ":",
+        aiPlan
+      );
 
       // Update parent component with trip plan
       setTripPlan(aiPlan);
 
       // Save trip plan to database
       try {
-        console.log("TripChatBot: Sending to /api/trip/trip-save at", new Date().toLocaleString(), ":", { plan: aiPlan });
-        const saveResponse = await axios.post("http://localhost:3000/api/trip/trip-save", {
-          plan: aiPlan,
-        }); // Cookies sent automatically
-        console.log("TripChatBot: Save Trip Response at", new Date().toLocaleString(), ":", saveResponse.data);
+        const saveResponse = await axios.post(
+          "http://localhost:3000/api/trip/save-trip",
+          {
+            plan: aiPlan,
+          },
+          { withCredentials: true }
+        ); // Cookies sent automatically
+        console.log(saveResponse.data);
       } catch (saveErr) {
-        console.error("TripChatBot: Failed to save trip at", new Date().toLocaleString(), ":", {
-          message: saveErr.message,
-          response: saveErr.response?.data,
-          status: saveErr.response?.status,
-        });
+        console.error(
+          "TripChatBot: Failed to save trip at",
+          new Date().toLocaleString(),
+          ":",
+          {
+            message: saveErr.message,
+            response: saveErr.response?.data,
+            status: saveErr.response?.status,
+          }
+        );
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "Trip plan generated but failed to save to database. You can still view it below." },
+          {
+            role: "assistant",
+            content:
+              "Trip plan generated but failed to save to database. You can still view it below.",
+          },
         ]);
       }
 
       setMessages((prev) => [
-        ...prev.filter((msg) => !msg.content.includes("generating the best possible trip")),
-        { role: "assistant", content: "Here’s your AI-generated trip plan! 🛫", tripData: aiPlan },
+        ...prev.filter(
+          (msg) => !msg.content.includes("generating the best possible trip")
+        ),
       ]);
     } catch (err) {
-      console.error("TripChatBot: Error generating trip at", new Date().toLocaleString(), ":", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-      });
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Oops! Something went wrong while generating your trip plan." },
+        {
+          role: "assistant",
+          content:
+            "Oops! Something went wrong while generating your trip plan.",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -119,10 +150,20 @@ function TripChatBot({ setTripPlan }) {
     if (currentQIndex < questions.length - 1) {
       setCurrentQIndex(currentQIndex + 1);
       setTimeout(() => {
-        setMessages([...newMessages, { role: "assistant", content: questions[currentQIndex + 1].text }]);
+        setMessages([
+          ...newMessages,
+          { role: "assistant", content: questions[currentQIndex + 1].text },
+        ]);
       }, 500);
     } else {
-      setMessages([...newMessages, { role: "assistant", content: "Thanks for your answers! Generating and saving your trip plan..." }]);
+      setMessages([
+        ...newMessages,
+        {
+          role: "assistant",
+          content:
+            "Thanks for your answers! Generating and saving your trip plan...",
+        },
+      ]);
       setTimeout(() => submitAllAnswers(newAnswers), 800);
     }
     setInput("");
@@ -164,60 +205,11 @@ function TripChatBot({ setTripPlan }) {
                   : "bg-gray-200 text-gray-800 rounded-bl-none"
               }`}
             >
-              {msg.tripData ? (
-                <div className="space-y-6">
-                  <h1 className="text-xl font-bold">{msg.tripData.tripTitle}</h1>
-                  <div className="grid grid-cols-2 gap-4 text-gray-700 text-sm">
-                    <p><strong>From:</strong> {msg.tripData.startingPoint}</p>
-                    <p><strong>To:</strong> {msg.tripData.destination}</p>
-                    <p><strong>Duration:</strong> {msg.tripData.durationDays} days</p>
-                    <p><strong>Budget:</strong> {msg.tripData.budgetCategory}</p>
-                    <p><strong>Group:</strong> {msg.tripData.groupSize}</p>
-                    <p><strong>Interests:</strong> {msg.tripData.interests.join(", ")}</p>
-                  </div>
-                  <div className="space-y-4">
-                    <h2 className="text-lg font-semibold">Itinerary Timeline</h2>
-                    <div className="relative">
-                      <div className="absolute left-4 top-0 h-full w-1 bg-blue-500"></div>
-                      {msg.tripData.itinerary.map((day) => (
-                        <div key={day.day} className="relative mb-8 pl-12">
-                          <div className="absolute left-2.5 top-2 w-4 h-4 bg-blue-500 rounded-full border-2 border-white"></div>
-                          <div className="border rounded-lg shadow-sm bg-white overflow-hidden">
-                            <button
-                              className="flex justify-between items-center w-full px-4 py-3 text-left font-semibold text-gray-800 hover:bg-gray-50 focus:outline-none"
-                              onClick={() => toggleDay(day.day)}
-                            >
-                              <span>Day {day.day}: {day.title}</span>
-                              {expandedDay === day.day ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
-                            </button>
-                            {expandedDay === day.day && (
-                              <div className="px-6 py-4 text-gray-700 space-y-2 bg-gray-50">
-                                <ul className="list-disc ml-5 space-y-1">
-                                  {day.activities.map((activity, idx) => (
-                                    <li key={idx}>{activity}</li>
-                                  ))}
-                                  <li><strong>Hotel:</strong> {day.hotel}</li>
-                                  <li><strong>Meals:</strong> {day.meals.join(", ")}</li>
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <h2 className="text-lg font-semibold">Recommendations</h2>
-                    <p><strong>Hotels:</strong> {msg.tripData.recommendations.hotels.join(", ")}</p>
-                    <p><strong>Restaurants:</strong> {msg.tripData.recommendations.restaurants.join(", ")}</p>
-                    <p><strong>Travel Tips:</strong> {msg.tripData.recommendations.travelTips.join("; ")}</p>
-                  </div>
-                </div>
-              ) : (
-                msg.content
-              )}
               <span className="block text-xs text-gray-500 mt-1">
-                {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </span>
             </div>
           </div>
