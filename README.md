@@ -31,12 +31,14 @@ A smart web application that helps you create personalized trip itineraries usin
 ## Tech Stack
 
 ### Frontend
+
 - **React** - User interface framework
 - **Tailwind CSS** - Styling and responsive design
 - **Axios** - API communication
 - **React Icons** - Beautiful icons throughout the app
 
 ### Backend
+
 - **Express.js** - Web server framework
 - **MongoDB** - Database for storing trips
 - **Mongoose** - MongoDB object modeling
@@ -86,12 +88,14 @@ Before you start, make sure you have these installed on your computer:
 ## Installation
 
 ### Step 1: Get the Code
+
 ```bash
 git clone https://github.com/theabdulla0/Travel-Management.git
 cd Travel-Management
 ```
 
 ### Step 2: Set Up the Backend
+
 ```bash
 # Go to backend folder
 cd backend
@@ -104,6 +108,7 @@ npm start
 ```
 
 ### Step 3: Set Up the Frontend
+
 ```bash
 # Open a new terminal and go to frontend folder
 cd frontend
@@ -135,6 +140,7 @@ URL=http://localhost:3000
 ```
 
 **Important:** Replace the placeholder values with your actual credentials:
+
 - Get your Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 - Set up Google App Password for email features
 - Create strong, unique secrets for JWT tokens
@@ -144,7 +150,9 @@ URL=http://localhost:3000
 ### Creating Your First Trip
 
 1. **Open the App** - Navigate to `http://localhost:3000`
-2. **Start Planning** - Click "Create New Trip" 
+
+2. **Start Planning** - Click "Create New Trip"
+
 3. **Chat with the Bot** - Answer questions about:
    - Where you're starting from
    - Your destination
@@ -170,17 +178,28 @@ URL=http://localhost:3000
 ## API Endpoints
 
 ### Generate Trip Plan
+
 ```http
 POST /api/ai
 ```
+
 **Body:**
+
 ```json
 {
-  "plan": ["New York", "Paris", "2 people", "Medium budget", "5 days", "Culture, Food"]
+  "plan": [
+    "New York",
+    "Paris",
+    "2 people",
+    "Medium budget",
+    "5 days",
+    "Culture, Food"
+  ]
 }
 ```
 
 **Response:**
+
 ```json
 {
   "tripTitle": "5-Day Cultural Journey to Paris",
@@ -208,14 +227,20 @@ POST /api/ai
 ```
 
 ### Save Trip
+
 ```http
 POST /api/trip/save-trip
 ```
+
 Requires authentication. Saves the generated trip to the database.
 
 ## Screenshots
 
-*Add screenshots of your application here once you have them*
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
 
 - Chatbot interface
 - Generated itinerary timeline
@@ -227,21 +252,25 @@ Requires authentication. Saves the generated trip to the database.
 ### Common Issues
 
 **🔧 Trip Not Saving?**
+
 - Check if you're logged in (JWT cookie present)
 - Look at browser console for error messages
 - Verify backend server is running
 
 **🔧 ViewTrip Component Not Working?**
+
 - Check browser console for error messages
 - Ensure the API response matches expected format
 - Verify trip data structure
 
 **🔧 Authentication Problems?**
+
 - Clear browser cookies and try again
 - Check if JWT secret is set in `.env`
 - Verify backend authentication middleware
 
 **🔧 Can't Connect to Database?**
+
 - Make sure MongoDB is running
 - Check your database URL in `.env`
 - Verify database permissions
@@ -259,6 +288,7 @@ I welcome contributions! Here's how you can help:
 7. **Open** a Pull Request
 
 ### What You Can Contribute
+
 - Bug fixes
 - New features
 - UI improvements
@@ -284,4 +314,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ by [theabdulla0](https://github.com/theabdulla0)**
 
-*Happy traveling! 🌍*
+_Happy traveling! 🌍_

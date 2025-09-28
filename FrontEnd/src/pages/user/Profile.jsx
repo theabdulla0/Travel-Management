@@ -15,7 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { logout } from "@/features/auth/authThunk";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import LayoutCommon from "@/components/common/LayoutCommon";
 
 export default function Profile() {
@@ -23,11 +23,11 @@ export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.user.name || "");
-  const [phone, setPhone] = useState(user?.user.profile?.phone || "");
+  const [name, setName] = useState(user?.data?.name || "");
+  const [phone, setPhone] = useState(user?.data?.profile?.phone || "");
 
   const handleUpdate = () => {
-    dispatch(updateProfile({ name, email, phone }))
+    dispatch(updateProfile({ name, phone }))
       .unwrap()
       .then(() => toast.success("Profile updated successfully"))
       .catch(() => toast.error("Failed to update profile"));
@@ -68,7 +68,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <Label className="mb-2">Email</Label>
-                  <Input value={user?.user.email} disabled />
+                  <Input value={user?.data?.email} disabled />
                 </div>
                 <div>
                   <Label className="mb-2">Phone</Label>
