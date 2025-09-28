@@ -49,7 +49,9 @@ const signup = async (req, res) => {
       .json(new ApiResponse(200, createUser, "user Register Successfully"));
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return res.json(
+      new ApiResponse(500, { error: error.message }, "Server Error"),
+    );
   }
 };
 
@@ -89,7 +91,9 @@ const login = async (req, res) => {
       );
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return res.json(
+      new ApiResponse(500, { error: error.message }, "Server Error"),
+    );
   }
 };
 
@@ -103,7 +107,9 @@ const getMe = async (req, res) => {
     res.json(new ApiResponse(200, user, "current user fetched"));
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return res.json(
+      new ApiResponse(500, { error: error.message }, "Server Error"),
+    );
   }
 };
 
@@ -147,7 +153,7 @@ const refreshAccessToken = async (req, res) => {
         ),
       );
   } catch (error) {
-    res.status(403).json({ message: "Invalid or expired token" });
+    return res.status(403).json({ message: "Invalid or expired token" });
   }
 };
 
@@ -174,7 +180,10 @@ const logout = async (req, res) => {
       .clearCookie("refreshToken", options)
       .json(new ApiResponse(200, {}, "user logged out successfully"));
   } catch (error) {
-    res.status(403).json({ message: "Invalid token" });
+    console.error(error);
+    return res.json(
+      new ApiResponse(500, { error: error.message }, "Server Error"),
+    );
   }
 };
 

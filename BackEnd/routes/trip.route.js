@@ -1,28 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const Trip = require("../models/trip.model");
+const {
+  SaveTrips,
+  ViewAllUserTrips,
+} = require("../controllers/trip.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
-
 // Save AI trip plan
-router.post("/save-trip", authMiddleware, async (req, res) => {
-  try {
-    const { plan } = req.body;
-    console.log("SavePlan", plan);
-    if (!plan) {
-      return res.status(400).json({ message: "Trip details are required" });
-    }
-    console.log("Save trip before", plan);
-    const newTrip = await Trip.create({
-      tripDetails: JSON.stringify(plan),
-      createdBy: req.user._id,
-    });
-    console.log("Save trip before", newTrip);
-
-    res.status(201).json({ message: "Trip saved successfully", trip: newTrip });
-  } catch (err) {
-    console.error("Error saving trip:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
+router.post("/save-trip", authMiddleware, SaveTrips);
+router.get("/", authMiddleware, ViewAllUserTrips);
 
 module.exports = router;

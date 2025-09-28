@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const tripSchema = new mongoose.Schema(
   {
     tripDetails: {
-      type: String,
+      type: Object,
       trim: true,
     },
     createdBy: {

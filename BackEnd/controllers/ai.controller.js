@@ -16,11 +16,13 @@ const generateAiPlanner = async (req, res) => {
     No explanations, no markdown, no text outside the JSON object.
     
     Schema to follow:
-    
     {
       "tripTitle": "string",
       "startingPoint": "string",
-      "destination": "string",
+      "destination": {
+        "city": "string",
+        "country": "string"
+      },
       "groupSize": "Solo | Couple | Family | Friends",
       "budgetCategory": "Low | Medium | High",
       "durationDays": number,
@@ -29,29 +31,61 @@ const generateAiPlanner = async (req, res) => {
         {
           "day": number,
           "title": "string",
-          "activities": ["activity1", "activity2"],
-          "hotel": "string",
-          "meals": ["breakfast", "lunch", "dinner"]
+          "activities": [
+            {
+              "name": "string",
+              "description": "string",
+              "mapLink": "https://www.google.com/maps/search/?api=1&query=<PLACE_NAME>,<CITY>,<COUNTRY>",
+              
+            }
+          ],
+          "hotel": {
+            "name": "string",
+            "mapLink": "https://www.google.com/maps/search/?api=1&query=<HOTEL_NAME>,<CITY>,<COUNTRY>",
+            
+          },
+          "meals": [
+            {
+              "name": "string",
+              "mapLink": "https://www.google.com/maps/search/?api=1&query=<RESTAURANT_NAME>,<CITY>,<COUNTRY>",
+              
+            }
+          ]
         }
       ],
       "recommendations": {
-        "hotels": ["hotel1", "hotel2"],
-        "restaurants": ["restaurant1", "restaurant2"],
+        "hotels": [
+          {
+            "name": "string",
+            "mapLink": "https://www.google.com/maps/search/?api=1&query=<HOTEL_NAME>,<CITY>,<COUNTRY>",
+            
+          }
+        ],
+        "restaurants": [
+          {
+            "name": "string",
+            "mapLink": "https://www.google.com/maps/search/?api=1&query=<RESTAURANT_NAME>,<CITY>,<COUNTRY>",
+            
+          }
+        ],
         "travelTips": ["tip1", "tip2"]
       }
     }
-    
+
     Rules:
-    - Always fill the itinerary with a day-by-day plan matching the trip duration.
-    - Suggest **realistic hotels, restaurants, and attractions** based on the destination.
-    - Keep text concise and usable in a UI.
-    - Never return text outside the JSON object.
-    `;
+    - Always include both "city" and "country" in the destination object.
+    - Always append <CITY>,<COUNTRY> in map links so Google Maps is precise.
+    - Replace placeholders with real names of hotels, attractions, and restaurants.
+    - Always generate a day-by-day itinerary matching durationDays.
+    - Keep text short and UI-friendly.
+    - Do not include anything outside the JSON object.
+`;
+
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: prompt,
     });
-    
+
     let text = response.text;
 
     const cleaned = text.replace(/```json\s*|\s*```/g, "").trim();

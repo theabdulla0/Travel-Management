@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
 
     profile: { type: profileSchema, default: () => ({}) },
-
+    trips: [{ type: mongoose.Schema.Types.ObjectId, ref: "Trip" }],
     refreshToken: { type: String, default: null },
   },
   { timestamps: true },
