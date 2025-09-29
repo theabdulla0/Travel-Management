@@ -11,7 +11,12 @@ const app = express();
 // };
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 
 app.use("/api/auth", require("./routes/user.route"));
@@ -21,9 +26,8 @@ app.use("/api", require("./routes/image.route"));
 app.use((req, res) => {
   res.send("404! Page not Found");
 });
-connectDB();
-// const PORT = process.env.PORT || 8000;
-// app.listen(PORT, () => {
-//   connectDB();
-//   console.log("Server running");
-// });
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  connectDB();
+  console.log("Server running");
+});
