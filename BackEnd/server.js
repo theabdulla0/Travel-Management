@@ -6,9 +6,7 @@ require("dotenv").config();
 const connectDB = require("./config/db");
 const app = express();
 const corsOptions = {
-  origin: [
-    "https://travel-management-rbbpa9ex5-pikasu2000s-projects.vercel.app",
-  ],
+  origin: "https://travel-management-lac.vercel.app/",
   credentials: true,
 };
 
