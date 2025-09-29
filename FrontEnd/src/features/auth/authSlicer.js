@@ -26,8 +26,15 @@ const authSlice = createSlice({
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.data;
-        localStorage.setItem("refreshToken");
-        localStorage.setItem("accessToken");
+        if (action.payload.data.accessToken) {
+          localStorage.setItem("accessToken", action.payload.data.accessToken);
+        }
+        if (action.payload.data.refreshToken) {
+          localStorage.setItem(
+            "refreshToken",
+            action.payload.data.refreshToken
+          );
+        }
       })
       .addCase(signup.rejected, (state, action) => {
         state.loading = false;
@@ -39,7 +46,15 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.hasFetchedUser = true;
-        console.log("login Slice", state.user);
+        if (action.payload.data.accessToken) {
+          localStorage.setItem("accessToken", action.payload.data.accessToken);
+        }
+        if (action.payload.data.refreshToken) {
+          localStorage.setItem(
+            "refreshToken",
+            action.payload.data.refreshToken
+          );
+        }
       })
       .addCase(login.pending, (state) => {
         state.loading = true;
@@ -51,8 +66,8 @@ const authSlice = createSlice({
 
       // Refresh Token
       .addCase(refreshToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken;
+        state.accessToken = action.payload.data.accessToken;
+        state.refreshToken = action.payload.data.refreshToken;
       })
 
       // Get Me
@@ -67,6 +82,8 @@ const authSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.hasFetchedUser = true;
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
       })
       .addCase(logout.rejected, (state) => {
         state.user = null;
