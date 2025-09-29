@@ -169,7 +169,11 @@ export default function Header({ setOpenLogin }) {
                     <NavigationMenuItem>
                       <NavigationMenuTrigger className="gap-2 flex items-center">
                         <Avatar className="h-8 w-8 border-2 border-green-600">
-                          <AvatarImage src={user?.avatar || "https://github.com/shadcn.png"} />
+                          <AvatarImage
+                            src={
+                              user?.avatar || "https://github.com/shadcn.png"
+                            }
+                          />
                           <AvatarFallback className="bg-green-600 text-white font-semibold text-xs">
                             {getUserInitials()}
                           </AvatarFallback>
@@ -216,12 +220,7 @@ export default function Header({ setOpenLogin }) {
                   </NavigationMenuList>
                 </NavigationMenu>
               ) : (
-                <Button
-                  onClick={() => setOpenLogin(true)}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 rounded-lg transition-all duration-300 hover:scale-105"
-                >
-                  Sign In
-                </Button>
+                <Button onClick={() => setOpenLogin(true)}>Sign In</Button>
               )}
             </div>
           </nav>
@@ -249,7 +248,9 @@ export default function Header({ setOpenLogin }) {
             {token && user && (
               <div className="flex items-center gap-3 px-3 py-3 bg-green-50 rounded-lg mb-3">
                 <Avatar className="h-10 w-10 border-2 border-green-600">
-                  <AvatarImage src={user?.avatar || "https://github.com/shadcn.png"} />
+                  <AvatarImage
+                    src={user?.avatar || "https://github.com/shadcn.png"}
+                  />
                   <AvatarFallback className="bg-green-600 text-white font-semibold">
                     {getUserInitials()}
                   </AvatarFallback>
@@ -356,7 +357,7 @@ export default function Header({ setOpenLogin }) {
       </header>
 
       {/* Spacer to prevent content from going under fixed header */}
-      <div className="h-14 sm:h-16 lg:h-[72px]" />
+      <div className="sm:h-16 " />
     </>
   );
 }
