@@ -76,7 +76,9 @@ const login = async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id,
     );
-  
+    const loggedInUser = await User.findById(user._id).select(
+      "-password -refreshToken",
+    );
 
     return res
       .status(200)
@@ -85,7 +87,7 @@ const login = async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          { accessToken, refreshToken },
+          { loggedInUser, accessToken, refreshToken },
           "user Logged In successfully",
         ),
       );

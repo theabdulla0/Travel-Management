@@ -32,7 +32,7 @@ function AuthModal({ open, setOpen }) {
       return;
     }
     try {
-      await dispatch(login({ email, password })).unwrap();
+      const res = await dispatch(login({ email, password })).unwrap();
       dispatch(setUserData(res.data));
       toast.success("Logged in successfully!");
       setOpen(false);
@@ -48,8 +48,7 @@ function AuthModal({ open, setOpen }) {
       return;
     }
     try {
-      const res = await dispatch(signup({ name, email, password })).unwrap();
-      dispatch(setUserData(res.data));
+      await dispatch(signup({ name, email, password })).unwrap();
       toast.success("Account created!");
       setOpen(false);
     } catch {

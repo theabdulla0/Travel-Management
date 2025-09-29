@@ -13,7 +13,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar,  AvatarImage } from "@/components/ui/avatar";
 
 export default function Header({ setOpenLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
