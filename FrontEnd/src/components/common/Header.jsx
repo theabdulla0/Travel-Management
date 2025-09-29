@@ -357,7 +357,7 @@ export default function Header({ setOpenLogin }) {
       </header>
 
       {/* Spacer to prevent content from going under fixed header */}
-      <div className="sm:h-16 " />
+      {/* <div className="sm:h-16 " /> */}
     </>
   );
 }
