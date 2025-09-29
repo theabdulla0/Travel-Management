@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
@@ -17,20 +17,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Header({ setOpenLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isAuthReady, setIsAuthReady] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, loading } = useSelector((state) => state.auth);
-  const token = localStorage.getItem("accessToken");
-
-  // Wait for initial auth check to complete
-  useEffect(() => {
-    // Set auth as ready after initial loading or if token exists
-    if (!loading || token) {
-      setIsAuthReady(true);
-    }
-  }, [loading, token]);
+  const { user } = useSelector((state) => state.auth);
 
   const tripComponents = [
     { title: "Create Trip", href: "/create-trip" },
@@ -40,34 +30,13 @@ export default function Header({ setOpenLogin }) {
     { title: "Reports", href: "/reports" },
   ];
 
-  const handleProtectedClick = (path) => {
-    if (!token) {
-      setOpenLogin(true);
-      return;
-    }
-    navigate(path);
-    setMobileOpen(false);
-  };
-
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await dispatch(logout());
     navigate("/");
     setMobileOpen(false);
   };
 
   const isActive = (path) => location.pathname === path;
-
-  // Get user initials
-  const getUserInitials = () => {
-    if (!user) return "U";
-    if (user.name) {
-      const names = user.name.split(" ");
-      return names.length > 1
-        ? `${names[0][0]}${names[1][0]}`.toUpperCase()
-        : names[0][0].toUpperCase();
-    }
-    return user.email?.[0]?.toUpperCase() || "U";
-  };
 
   return (
     <>
@@ -90,9 +59,7 @@ export default function Header({ setOpenLogin }) {
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
-                    className={`${navigationMenuTriggerStyle()} font-medium transition-colors ${
-                      isActive("/") ? "text-green-600" : "hover:text-green-600"
-                    }`}
+                    className={navigationMenuTriggerStyle()}
                   >
                     <Link to="/">Home</Link>
                   </NavigationMenuLink>
@@ -100,11 +67,7 @@ export default function Header({ setOpenLogin }) {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger
-                    className={`font-medium transition-colors ${
-                      tripComponents.some((t) => t.href === location.pathname)
-                        ? "text-green-600"
-                        : "hover:text-green-600"
-                    }`}
+                    className={navigationMenuTriggerStyle()}
                   >
                     Trips
                   </NavigationMenuTrigger>
@@ -113,16 +76,12 @@ export default function Header({ setOpenLogin }) {
                       {tripComponents.map((item) => (
                         <li key={item.href}>
                           <NavigationMenuLink asChild>
-                            <button
-                              className={`block w-full px-3 py-2.5 rounded-lg text-left transition-colors font-medium text-sm ${
-                                isActive(item.href)
-                                  ? "bg-green-50 text-green-600"
-                                  : "hover:bg-green-50 hover:text-green-600"
-                              }`}
-                              onClick={() => handleProtectedClick(item.href)}
+                            <Link
+                              to={item.href}
+                              className={navigationMenuTriggerStyle()}
                             >
                               {item.title}
-                            </button>
+                            </Link>
                           </NavigationMenuLink>
                         </li>
                       ))}
@@ -133,11 +92,7 @@ export default function Header({ setOpenLogin }) {
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
-                    className={`${navigationMenuTriggerStyle()} font-medium transition-colors ${
-                      isActive("/about")
-                        ? "text-green-600"
-                        : "hover:text-green-600"
-                    }`}
+                    className={navigationMenuTriggerStyle()}
                   >
                     <Link to="/about">About</Link>
                   </NavigationMenuLink>
@@ -146,11 +101,7 @@ export default function Header({ setOpenLogin }) {
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
-                    className={`${navigationMenuTriggerStyle()} font-medium transition-colors ${
-                      isActive("/contact")
-                        ? "text-green-600"
-                        : "hover:text-green-600"
-                    }`}
+                    className={navigationMenuTriggerStyle()}
                   >
                     <Link to="/contact">Contact Us</Link>
                   </NavigationMenuLink>
@@ -160,59 +111,32 @@ export default function Header({ setOpenLogin }) {
 
             {/* Profile / Auth Section */}
             <div className="flex-1 flex justify-end items-center">
-              {!isAuthReady ? (
-                // Loading skeleton
-                <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse" />
-              ) : token ? (
+              {user ? (
                 <NavigationMenu>
                   <NavigationMenuList>
                     <NavigationMenuItem>
                       <NavigationMenuTrigger className="gap-2 flex items-center">
                         <Avatar className="h-8 w-8 border-2 border-green-600">
-                          <AvatarImage
-                            src={
-                              user?.avatar || "https://github.com/shadcn.png"
-                            }
-                          />
-                          <AvatarFallback className="bg-green-600 text-white font-semibold text-xs">
-                            {getUserInitials()}
-                          </AvatarFallback>
+                          <AvatarImage src={"https://github.com/shadcn.png"} />
                         </Avatar>
-                        <span className="hidden lg:inline font-medium text-green-600">
-                          {user?.name?.split(" ")[0] || "Account"}
-                        </span>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
                         <ul className="grid gap-1 p-2 w-[180px]">
-                          {user && (
-                            <li className="px-3 py-2 border-b border-gray-100 mb-1">
-                              <p className="font-semibold text-sm truncate">
-                                {user.name || "User"}
-                              </p>
-                              <p className="text-xs text-gray-500 truncate">
-                                {user.email}
-                              </p>
-                            </li>
-                          )}
                           <li>
-                            <NavigationMenuLink asChild>
-                              <button
-                                className="block w-full px-3 py-2.5 hover:bg-green-50 hover:text-green-600 rounded-lg text-left transition-colors font-medium text-sm"
-                                onClick={() => navigate("/profile")}
-                              >
-                                Profile
-                              </button>
-                            </NavigationMenuLink>
+                            <Link
+                              to="/profile"
+                              className="block w-full px-3 py-2.5 hover:bg-green-50 hover:text-green-600 rounded-lg text-left transition-colors font-medium text-sm"
+                            >
+                              Profile
+                            </Link>
                           </li>
                           <li>
-                            <NavigationMenuLink asChild>
-                              <button
-                                className="block w-full px-3 py-2.5 hover:bg-red-50 hover:text-red-600 rounded-lg text-left transition-colors font-medium text-sm"
-                                onClick={handleLogout}
-                              >
-                                Logout
-                              </button>
-                            </NavigationMenuLink>
+                            <button
+                              onClick={handleLogout}
+                              className="block w-full px-3 py-2.5 hover:bg-red-50 hover:text-red-600 rounded-lg text-left transition-colors font-medium text-sm"
+                            >
+                              Logout
+                            </button>
                           </li>
                         </ul>
                       </NavigationMenuContent>
@@ -245,22 +169,11 @@ export default function Header({ setOpenLogin }) {
         >
           <nav className="flex flex-col px-4 py-4 space-y-1">
             {/* User Info for Mobile */}
-            {token && user && (
+            {user && (
               <div className="flex items-center gap-3 px-3 py-3 bg-green-50 rounded-lg mb-3">
                 <Avatar className="h-10 w-10 border-2 border-green-600">
-                  <AvatarImage
-                    src={user?.avatar || "https://github.com/shadcn.png"}
-                  />
-                  <AvatarFallback className="bg-green-600 text-white font-semibold">
-                    {getUserInitials()}
-                  </AvatarFallback>
+                  <AvatarImage src={"https://github.com/shadcn.png"} />
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">
-                    {user.name || "User"}
-                  </p>
-                  <p className="text-xs text-gray-600 truncate">{user.email}</p>
-                </div>
               </div>
             )}
 
@@ -280,9 +193,10 @@ export default function Header({ setOpenLogin }) {
               Trips
             </div>
             {tripComponents.map((item) => (
-              <button
+              <Link
                 key={item.href}
-                onClick={() => handleProtectedClick(item.href)}
+                to={item.href}
+                onClick={() => setMobileOpen(false)}
                 className={`text-left px-4 py-2.5 rounded-lg transition-colors font-medium w-full ${
                   isActive(item.href)
                     ? "bg-green-50 text-green-600"
@@ -290,7 +204,7 @@ export default function Header({ setOpenLogin }) {
                 }`}
               >
                 {item.title}
-              </button>
+              </Link>
             ))}
 
             <Link
@@ -318,27 +232,21 @@ export default function Header({ setOpenLogin }) {
             </Link>
 
             <div className="pt-3 border-t border-gray-200 mt-2 space-y-2">
-              {!isAuthReady ? (
-                <div className="h-10 w-full bg-gray-200 rounded-lg animate-pulse" />
-              ) : token ? (
+              {user ? (
                 <>
-                  <Button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      navigate("/profile");
-                    }}
-                    variant="outline"
-                    className="w-full border-green-600 text-green-600 hover:bg-green-50 font-semibold"
+                  <Link
+                    to="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="block w-full px-3 py-2.5 border border-green-600 text-green-600 hover:bg-green-50 rounded-lg font-semibold text-center"
                   >
                     Profile
-                  </Button>
-                  <Button
+                  </Link>
+                  <button
                     onClick={handleLogout}
-                    variant="outline"
-                    className="w-full border-red-600 text-red-600 hover:bg-red-50 font-semibold"
+                    className="block w-full px-3 py-2.5 border border-red-600 text-red-600 hover:bg-red-50 rounded-lg font-semibold text-center"
                   >
                     Logout
-                  </Button>
+                  </button>
                 </>
               ) : (
                 <Button
@@ -355,9 +263,6 @@ export default function Header({ setOpenLogin }) {
           </nav>
         </div>
       </header>
-
-      {/* Spacer to prevent content from going under fixed header */}
-      {/* <div className="sm:h-16 " /> */}
     </>
   );
 }

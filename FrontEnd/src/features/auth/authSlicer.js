@@ -1,11 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { signup, login, refreshToken, getMe, logout } from "./authThunk";
+import {
+  signup,
+  login,
+  refreshToken,
+  getMe,
+  logout,
+  verifyOtp,
+  sendOtp,
+  reset_password,
+} from "./authThunk";
 
 const initialState = {
   user: null,
   loading: false,
-  hasFetchedUser: false,
   error: null,
+  otpSent: false,
+  otpVerified: false,
 };
 
 const authSlice = createSlice({
@@ -13,6 +23,9 @@ const authSlice = createSlice({
 
   initialState,
   reducers: {
+    setUserData: (state, action) => {
+      state.user = action.payload;
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -25,16 +38,6 @@ const authSlice = createSlice({
       })
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.data;
-        if (action.payload.data.accessToken) {
-          localStorage.setItem("accessToken", action.payload.data.accessToken);
-        }
-        if (action.payload.data.refreshToken) {
-          localStorage.setItem(
-            "refreshToken",
-            action.payload.data.refreshToken
-          );
-        }
       })
       .addCase(signup.rejected, (state, action) => {
         state.loading = false;
@@ -44,17 +47,6 @@ const authSlice = createSlice({
       // Login
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
-        state.hasFetchedUser = true;
-        if (action.payload.data.accessToken) {
-          localStorage.setItem("accessToken", action.payload.data.accessToken);
-        }
-        if (action.payload.data.refreshToken) {
-          localStorage.setItem(
-            "refreshToken",
-            action.payload.data.refreshToken
-          );
-        }
       })
       .addCase(login.pending, (state) => {
         state.loading = true;
@@ -81,16 +73,53 @@ const authSlice = createSlice({
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
-        state.hasFetchedUser = true;
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
       })
       .addCase(logout.rejected, (state) => {
         state.user = null;
-        state.hasFetchedUser = true;
+      })
+
+      // --- OTP flow ---
+      .addCase(sendOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(sendOtp.fulfilled, (state, action) => {
+        state.loading = false;
+        state.otpSent = true;
+      })
+      .addCase(sendOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(verifyOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyOtp.fulfilled, (state, action) => {
+        state.loading = false;
+        state.otpVerified = true;
+      })
+      .addCase(verifyOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(reset_password.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(reset_password.fulfilled, (state, action) => {
+        state.loading = false;
+        state.otpSent = false;
+        state.otpVerified = false;
+      })
+      .addCase(reset_password.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, setUserData } = authSlice.actions;
 export default authSlice.reducer;

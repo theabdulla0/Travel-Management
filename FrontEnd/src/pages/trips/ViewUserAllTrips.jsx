@@ -17,7 +17,6 @@ function ViewUserAllTrips() {
 
   useEffect(() => {
     dispatch(ViewTrips());
-    console.log(tripPlan);
   }, [dispatch]);
 
   if (error) {

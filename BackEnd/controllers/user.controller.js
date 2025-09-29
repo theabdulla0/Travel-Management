@@ -18,6 +18,13 @@ const generateAccessAndRefreshToken = async (userId) => {
   }
 };
 
+const options = {
+  httpOnly: true,
+  secure: false,
+  sameSite: "strict",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
 //  Signup
 const signup = async (req, res) => {
   try {
@@ -46,7 +53,7 @@ const signup = async (req, res) => {
     }
     return res
       .status(201)
-      .json(new ApiResponse(200, createUser, "user Register Successfully"));
+      .json(new ApiResponse(200, {}, "user Register Successfully"));
   } catch (error) {
     console.error(error);
     return res.json(
@@ -69,14 +76,7 @@ const login = async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id,
     );
-    const loggedInUser = await User.findById(user._id).select(
-      "-password -refreshToken",
-    );
-
-    const options = {
-      httpOnly: true,
-      secure: false,
-    };
+  
 
     return res
       .status(200)
@@ -85,7 +85,7 @@ const login = async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          { user: loggedInUser, accessToken, refreshToken },
+          { accessToken, refreshToken },
           "user Logged In successfully",
         ),
       );
@@ -103,8 +103,9 @@ const getMe = async (req, res) => {
     const user = await User.findById(req.user._id).select(
       "-password -refreshToken",
     );
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(new ApiResponse(200, user, "current user fetched"));
+    if (!user) return res.json(new ApiResponse(400, {}, "User not found"));
+
+    return res.json(new ApiResponse(200, user, ""));
   } catch (error) {
     console.error(error);
     return res.json(
@@ -133,10 +134,6 @@ const refreshAccessToken = async (req, res) => {
     if (incomingRefreshToken !== user?.refreshToken) {
       return res.status(403).json({ message: "refresh token is expired" });
     }
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
 
     const { accessToken, NewRefreshToken } =
       await generateAccessAndRefreshToken(user._id);
@@ -170,14 +167,9 @@ const logout = async (req, res) => {
       { new: true },
     );
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
-
     res
-      .clearCookie("accessToken", options)
-      .clearCookie("refreshToken", options)
+      .clearCookie("accessToken")
+      .clearCookie("refreshToken")
       .json(new ApiResponse(200, {}, "user logged out successfully"));
   } catch (error) {
     console.error(error);
@@ -187,50 +179,65 @@ const logout = async (req, res) => {
   }
 };
 
-//  Forgot Password
-const forgotPassword = async (req, res) => {
+const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "10m",
-    });
-
-    const resetLink = `${process.env.URL}/auth/reset-password?token=${resetToken}`;
-
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    user.resetOtp = otp;
+    user.otpExpires = Date.now() + 5 * 60 * 1000;
+    user.isOtpVerified = false;
+    await user.save();
     await sendMail({
       to: email,
-      subject: "Password Reset",
-      text: `Click here to reset: ${resetLink}`,
-      html: `<h4>Password Reset</h4><p><a href="${resetLink}">Reset Password</a></p>`,
+      subject: "Reset Your Password",
+      html: `<p>Your OTP of Password reset is <b>${otp}</b>. I will expire in 5 minutes</p>`,
     });
-
-    return res.json({ message: "Reset link sent to email" });
+    return res.json(new ApiResponse(200, {}, "otp send Successfully"));
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.json(new ApiResponse(500, {}, { error: error.message }));
+  }
+};
+
+const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const user = await User.findOne({ email });
+    if (!user || user.resetOtp !== otp || user.otpExpires < Date.now())
+      return res.json(new ApiResponse(400, {}, { error: error.message }));
+    user.isOtpVerified = true;
+    user.resetOtp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+    return res.json(new ApiResponse(200, {}, "otp verified Successfully"));
+  } catch (error) {
+    return res.json(new ApiResponse(500, {}, { error: error.message }));
   }
 };
 
 //  Reset Password
 const resetPassword = async (req, res) => {
   try {
-    // const { token } = req.query;
-    const { oldPassword, newPassword } = req.body;
+    const { email, oldPassword, newPassword } = req.body;
 
-    const user = await User.findById(req.user?._id);
+    const user = await User.findOne({ email });
+    if (!email || !user.isOtpVerified) {
+      return res.json(new ApiResponse(400, {}, "Otp verified required"));
+    }
     const isOldPasswordCorrect = await user.isPasswordCorrect(oldPassword);
     if (!isOldPasswordCorrect) {
-      return res.status(404).json({ message: "Old Password incorrect" });
+      return res.json(new ApiResponse(400, {}, "Old Password incorrect"));
     }
 
     user.password = newPassword;
+    user.isOtpVerified = false;
     await user.save({ validateBeforeSave: false });
 
     return res.json(new ApiResponse(200, {}, "Password changed successfully"));
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.json(new ApiResponse(500, {}, { error: error.message }));
   }
 };
 
@@ -240,6 +247,7 @@ module.exports = {
   getMe,
   refreshAccessToken,
   logout,
-  forgotPassword,
+  sendOTP,
+  verifyOTP,
   resetPassword,
 };

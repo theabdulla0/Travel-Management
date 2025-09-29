@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
@@ -23,8 +21,8 @@ export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.data?.name || "");
-  const [phone, setPhone] = useState(user?.data?.profile?.phone || "");
+  const [name, setName] = useState(user?.name || "");
+  const [phone, setPhone] = useState(user?.profile?.phone || "");
 
   const handleUpdate = () => {
     dispatch(updateProfile({ name, phone }))
@@ -68,7 +66,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <Label className="mb-2">Email</Label>
-                  <Input value={user?.data?.email} disabled />
+                  <Input value={user?.email} disabled />
                 </div>
                 <div>
                   <Label className="mb-2">Phone</Label>

@@ -20,7 +20,7 @@ export const login = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const res = await API.post("/login", formData);
-      console.log(res.data);
+
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Login failed");
@@ -47,7 +47,7 @@ export const getMe = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await API.get("/me");
-      console.log("getme", res.data);
+
       return res.data;
     } catch (err) {
       return rejectWithValue("Failed to fetch user");
@@ -68,18 +68,33 @@ export const logout = createAsyncThunk(
   }
 );
 
-export const forgot_password = createAsyncThunk(
-  "auth/forgot_password",
+export const sendOtp = createAsyncThunk(
+  "auth/sendOtp",
   async (email, { rejectWithValue }) => {
     try {
-      const res = await API.post("/forgot-password", email);
+      const res = await API.post("/send-otp", { email });
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Login failed");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to send OTP"
+      );
     }
   }
 );
 
+export const verifyOtp = createAsyncThunk(
+  "auth/verifyOtp",
+  async ({ email, otp }, { rejectWithValue }) => {
+    try {
+      const res = await API.post("/verify-otp", { email, otp });
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to verify OTP"
+      );
+    }
+  }
+);
 export const reset_password = createAsyncThunk(
   "auth/reset_password",
   async (formData, { rejectWithValue }) => {
@@ -87,7 +102,9 @@ export const reset_password = createAsyncThunk(
       const res = await API.post("/reset-password", formData);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Login failed");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to reset password"
+      );
     }
   }
 );

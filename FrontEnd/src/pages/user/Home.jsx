@@ -25,7 +25,7 @@ import TestimonialSection from "@/components/TestimonialSection";
 
 function Home() {
   const iconClass =
-    "text-6xl sm:text-7xl lg:text-8xl mb-3 sm:mb-4 text-blue-600 transition-transform duration-300 hover:scale-110";
+    "text-6xl sm:text-7xl lg:text-8xl mb-3 sm:mb-4 text-yellow-400 transition-transform duration-300 hover:scale-110";
 
   const cardCarouselItems = [
     {

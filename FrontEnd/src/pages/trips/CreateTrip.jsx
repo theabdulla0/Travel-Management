@@ -7,15 +7,6 @@ import ViewTrip from "./ViewTrip";
 function CreateTrip() {
   const [tripPlan, setTripPlan] = useState(null);
 
-  useEffect(() => {
-    console.log(
-      "CreateTrip: tripPlan state updated at",
-      new Date().toLocaleString(),
-      ":",
-      tripPlan
-    );
-  }, [tripPlan]);
-
   return (
     <LayoutCommon>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-10">

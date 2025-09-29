@@ -65,13 +65,13 @@ function TripChatBot({ setTripPlan }) {
 
       // Generate trip plan
       const aiPlan = await dispatch(AiGenerateTrip(allAnswers)).unwrap();
-      console.log("AI Plan:", aiPlan);
+   
       setTripPlan(aiPlan);
 
       // Save trip plan to database
       try {
         const saveResponse = await dispatch(SaveTrip(aiPlan)).unwrap();
-        console.log("Trip saved:", saveResponse.data);
+  
       } catch (saveErr) {
         console.error("Failed to save trip:", saveErr.response?.data);
         setMessages((prev) => [

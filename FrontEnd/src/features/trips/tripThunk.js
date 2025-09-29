@@ -20,7 +20,6 @@ export const AiGenerateTrip = createAsyncThunk(
   async (allAnswers, { rejectWithValue }) => {
     try {
       const res = await TripAPI.post("/ai", { plan: allAnswers });
-      console.log(res.data.data);
       return res.data.data || res.data;
     } catch (err) {
       return rejectWithValue(

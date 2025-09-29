@@ -105,7 +105,7 @@ const generateAiPlanner = async (req, res) => {
 
     return res.status(200).json(parsed);
   } catch (error) {
-    console.log(error);
+
     return res
       .status(500)
       .json({ message: "failed to generate", error: error.message });
@@ -115,11 +115,10 @@ const generateAiPlanner = async (req, res) => {
 const SaveTrips = async (req, res) => {
   try {
     const { plan } = req.body;
-    console.log("SavePlan", plan);
+
     if (!plan) {
       return res.status(400).json({ message: "Trip details are required" });
     }
-    console.log("Save trip before", plan);
     const newTrip = await Trip.create({
       tripDetails: plan,
       createdBy: req.user._id,

@@ -48,6 +48,9 @@ const userSchema = new mongoose.Schema(
     profile: { type: profileSchema, default: () => ({}) },
     trips: [{ type: mongoose.Schema.Types.ObjectId, ref: "Trip" }],
     refreshToken: { type: String, default: null },
+    resetOtp: { type: String, minlength: 4 },
+    otpExpires: { type: Date },
+    isOtpVerified: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

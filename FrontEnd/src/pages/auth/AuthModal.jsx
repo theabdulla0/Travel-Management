@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login, signup } from "../../features/auth/authThunk";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { setUserData } from "@/features/auth/authSlicer";
 
 function AuthModal({ open, setOpen }) {
   const [tab, setTab] = useState("login");
@@ -32,7 +33,7 @@ function AuthModal({ open, setOpen }) {
     }
     try {
       await dispatch(login({ email, password })).unwrap();
-
+      dispatch(setUserData(res.data));
       toast.success("Logged in successfully!");
       setOpen(false);
     } catch (err) {
@@ -47,8 +48,8 @@ function AuthModal({ open, setOpen }) {
       return;
     }
     try {
-      await dispatch(signup({ name, email, password })).unwrap();
-      // dispatch(getMe()).unwrap();
+      const res = await dispatch(signup({ name, email, password })).unwrap();
+      dispatch(setUserData(res.data));
       toast.success("Account created!");
       setOpen(false);
     } catch {
@@ -58,7 +59,6 @@ function AuthModal({ open, setOpen }) {
   };
 
   const googleLogin = () => {
-    console.log("Google OAuth flow here...");
     toast.info("Google login clicked");
   };
 
