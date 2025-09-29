@@ -19,7 +19,7 @@ export default function ForgotPassword() {
   const [oldPassword, setOldPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(3);
+  const [step, setStep] = useState(1);
   const [otp, setOtp] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
