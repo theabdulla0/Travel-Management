@@ -26,6 +26,8 @@ const authSlice = createSlice({
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.data;
+        localStorage.setItem("refreshToken");
+        localStorage.setItem("accessToken");
       })
       .addCase(signup.rejected, (state, action) => {
         state.loading = false;
@@ -35,7 +37,9 @@ const authSlice = createSlice({
       // Login
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.data;
+        state.user = action.payload;
+        state.hasFetchedUser = true;
+        console.log("login Slice", state.user);
       })
       .addCase(login.pending, (state) => {
         state.loading = true;

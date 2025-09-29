@@ -24,7 +24,8 @@ import { Button } from "@/components/ui/button";
 import TestimonialSection from "@/components/TestimonialSection";
 
 function Home() {
-  const iconClass = "text-8xl mb-4"; // uniform icon size
+  const iconClass =
+    "text-6xl sm:text-7xl lg:text-8xl mb-3 sm:mb-4 text-blue-600 transition-transform duration-300 hover:scale-110";
 
   const cardCarouselItems = [
     {
@@ -41,7 +42,7 @@ function Home() {
         "https://travelwp.physcode.com/main-demo/wp-content/uploads/sites/7/2023/07/bangkok.png",
     },
     {
-      title: "Cancum, Mexico",
+      title: "Cancun, Mexico",
       description:
         "Relax on the stunning beaches and explore ancient ruins in Cancun.",
       imageUrl:
@@ -60,16 +61,19 @@ function Home() {
     <LayoutCommon>
       <Hero />
 
-      <div className="container mx-auto my-10 px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {/* Features Section */}
+      <div className="container mx-auto my-12 sm:my-16 lg:my-20 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {/* Card 1 */}
-          <Card className="border-0 shadow-none">
-            <CardHeader className="text-center">
+          <Card className="border-0 shadow-none hover:shadow-lg transition-all duration-300 rounded-xl p-2">
+            <CardHeader className="text-center space-y-3">
               <div className="flex justify-center">
                 <GiGlobe className={iconClass} />
               </div>
-              <CardTitle>Discover the possibilities</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg sm:text-xl font-bold">
+                Discover the possibilities
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 With nearly half a million attractions, hotels & more, you're
                 sure to find joy
               </CardDescription>
@@ -77,13 +81,15 @@ function Home() {
           </Card>
 
           {/* Card 2 */}
-          <Card className="border-0 shadow-none">
-            <CardHeader className="text-center">
+          <Card className="border-0 shadow-none hover:shadow-lg transition-all duration-300 rounded-xl p-2">
+            <CardHeader className="text-center space-y-3">
               <div className="flex justify-center">
                 <MdOutlineDiscount className={iconClass} />
               </div>
-              <CardTitle>Enjoy deals & delights</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg sm:text-xl font-bold">
+                Enjoy deals & delights
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 Quality activities. Great prices. Plus, earn credits to save
                 more.
               </CardDescription>
@@ -91,13 +97,15 @@ function Home() {
           </Card>
 
           {/* Card 3 */}
-          <Card className="border-0 shadow-none">
-            <CardHeader className="text-center">
+          <Card className="border-0 shadow-none hover:shadow-lg transition-all duration-300 rounded-xl p-2">
+            <CardHeader className="text-center space-y-3">
               <div className="flex justify-center">
                 <TbBeach className={iconClass} />
               </div>
-              <CardTitle>Exploring made easy</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg sm:text-xl font-bold">
+                Exploring made easy
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 Book last minute, skip lines & get free cancellation for easier
                 exploring.
               </CardDescription>
@@ -105,13 +113,15 @@ function Home() {
           </Card>
 
           {/* Card 4 */}
-          <Card className="border-0 shadow-none">
-            <CardHeader className="text-center">
+          <Card className="border-0 shadow-none hover:shadow-lg transition-all duration-300 rounded-xl p-2">
+            <CardHeader className="text-center space-y-3">
               <div className="flex justify-center">
                 <GiRibbonMedal className={iconClass} />
               </div>
-              <CardTitle>Travel you can trust</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg sm:text-xl font-bold">
+                Travel you can trust
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 Read reviews & get reliable customer support. We're with you at
                 every step
               </CardDescription>
@@ -120,32 +130,40 @@ function Home() {
         </div>
       </div>
 
-      <div className="mt-16 px-4">
-        <h2 className="text-2xl font-bold mb-6">Top Destinations</h2>
-        <Carousel
-          opts={{ align: "start" }}
-          className="w-full overflow-x-hidden relative"
-        >
-          <CarouselContent className="flex gap-6">
+      {/* Top Destinations Section */}
+      <div className="container mx-auto mt-16 sm:mt-20 lg:mt-24 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+            Top Destinations
+          </h2>
+          <p className="hidden sm:block text-sm text-gray-500">
+            Explore amazing places
+          </p>
+        </div>
+
+        <Carousel opts={{ align: "start", loop: true }} className="w-full">
+          <CarouselContent className="-ml-2 sm:-ml-4">
             {cardCarouselItems.map((item, index) => (
               <CarouselItem
                 key={index}
-                className="flex-none w-44 md:w-60 lg:w-76"
+                className="pl-2 sm:pl-4 basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
               >
-                <Card className="rounded-xl overflow-hidden shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl p-0">
-                  <div className="relative w-full h-64 md:h-72 lg:h-80">
+                <Card className="rounded-2xl overflow-hidden shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-0 h-full">
+                  <div className="relative w-full h-64 sm:h-72 lg:h-80 group">
                     <img
                       src={item.imageUrl}
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <h3 className="font-bold text-lg md:text-xl">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white">
+                      <h3 className="font-bold text-lg sm:text-xl mb-1 sm:mb-2">
                         {item.title}
                       </h3>
-                      <p className="text-sm md:text-base">{item.description}</p>
+                      <p className="text-xs sm:text-sm text-gray-200 line-clamp-2">
+                        {item.description}
+                      </p>
                     </div>
                   </div>
                 </Card>
@@ -153,43 +171,47 @@ function Home() {
             ))}
           </CarouselContent>
 
-          <CarouselPrevious className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
-            ‹
-          </CarouselPrevious>
-          <CarouselNext className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
-            ›
-          </CarouselNext>
+          <CarouselPrevious className="hidden sm:flex -left-4 lg:-left-6" />
+          <CarouselNext className="hidden sm:flex -right-4 lg:-right-6" />
         </Carousel>
       </div>
 
-      {/* subscription card */}
-      <div className="mt-16 px-4 mb-20">
-        <div className="relative w-full">
+      {/* Subscription Section */}
+      <div className="container mx-auto mt-16 sm:mt-20 lg:mt-24 mb-16 sm:mb-20 lg:mb-24 px-4 sm:px-6 lg:px-8">
+        <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl min-h-[400px] sm:min-h-[500px]">
           <img
             src="https://travelwp.physcode.com/main-demo/wp-content/uploads/sites/7/2023/07/subrice.png"
-            alt=""
-            className="w-full h-auto object-cover rounded-xl"
+            alt="Subscribe banner"
+            className="w-full h-full object-cover absolute inset-0"
           />
 
-          {/* Overlay subscription card */}
-          <div className="absolute inset-x-1/2 -translate-x-3/4 -translate-y-1/2 top-1/2 bg-black rounded-2xl p-6 sm:p-8 w-11/12 sm:w-3/4 md:w-1/2 lg:w-1/2 shadow-xl">
-            <div className="text-white">
-              <h2 className="text-3xl font-bold">Subscribe & Get 20% off</h2>
-              <p className="mt-4 text-sm md:text-base">
-                Join our newsletter and discover new destinations to inspire the
-                traveler within. Plus, get 20% off at our online shop. Every
-                week you’ll receive expert advice, tips, exclusive offers, and
-                much more.
-              </p>
-              <div className="mt-6 flex flex-col sm:flex-row justify-center gap-2">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full sm:w-auto sm:flex-1 bg-white text-black"
-                />
-                <Button className="mt-2 sm:mt-0" variant="secondary">
-                  Subscribe
-                </Button>
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/30"></div>
+
+          {/* Subscription card */}
+          <div className="relative flex items-center justify-center min-h-[400px] sm:min-h-[500px] p-4 sm:p-6">
+            <div className="bg-gradient-to-br from-black/90 to-black/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 lg:p-10 w-full max-w-2xl shadow-2xl border border-white/10">
+              <div className="text-white space-y-4 sm:space-y-6">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
+                  Subscribe & Get{" "}
+                  <span className="text-yellow-400">20% off</span>
+                </h2>
+                <p className="text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed">
+                  Join our newsletter and discover new destinations to inspire
+                  the traveler within. Plus, get 20% off at our online shop.
+                  Every week you'll receive expert advice, tips, exclusive
+                  offers, and much more.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 pt-2">
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="flex-1 bg-white/95 text-black border-0 h-11 sm:h-12 text-sm sm:text-base rounded-lg focus:ring-2 focus:ring-yellow-400"
+                  />
+                  <Button className="h-11 sm:h-12 px-6 sm:px-8 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg transition-all duration-300 hover:scale-105 text-sm sm:text-base">
+                    Subscribe
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -197,7 +219,7 @@ function Home() {
       </div>
 
       {/* Testimonial Section */}
-      <div className="mt-16 px-4">
+      <div className="container mx-auto mt-16 sm:mt-20 lg:mt-24 mb-12 sm:mb-16 lg:mb-20 px-4 sm:px-6 lg:px-8">
         <TestimonialSection />
       </div>
     </LayoutCommon>

@@ -7,6 +7,7 @@ import { React } from "react";
 import Profile from "./pages/user/Profile";
 import ViewUserAllTrips from "./pages/trips/ViewUserAllTrips";
 import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 function App() {
   return (
@@ -14,10 +15,31 @@ function App() {
       <Routes>
         <Route path="*" element={<NotFoundPage />} />
         <Route path="/" element={<Home />} />
-        <Route path="/create-trip" element={<CreateTrip />} />
-        <Route path="/trips" element={<ViewUserAllTrips />} />
+        <Route
+          path="/create-trip"
+          element={
+            <ProtectedRoute>
+              <CreateTrip />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trips"
+          element={
+            <ProtectedRoute>
+              <ViewUserAllTrips />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/forgot-password" element={<PasswordPassword />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       <Toaster position="top-right" richColors />
     </div>
