@@ -7,7 +7,6 @@ const connectDB = require("./config/db");
 const app = express();
 const corsOptions = {
   origin: [
-    "http://localhost:5173",
     "https://travel-management-rbbpa9ex5-pikasu2000s-projects.vercel.app",
   ],
   credentials: true,
