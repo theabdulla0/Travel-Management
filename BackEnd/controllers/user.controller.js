@@ -120,39 +120,44 @@ const getMe = async (req, res) => {
 const refreshAccessToken = async (req, res) => {
   const incomingRefreshToken =
     req.cookies.refreshToken || req.body.refreshToken;
-  if (!incomingRefreshToken)
+  if (!incomingRefreshToken) {
     return res.status(401).json({ message: "unauthorized request" });
+  }
 
   try {
-    const decodedToken = jwt.verify(
+    const decoded = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET,
     );
+    const user = await User.findById(decoded._id);
 
-    const user = await User.findById(decodedToken._id);
     if (!user)
       return res.status(403).json({ message: "Invalid refresh token" });
-
-    if (incomingRefreshToken !== user?.refreshToken) {
-      return res.status(403).json({ message: "refresh token is expired" });
+    if (incomingRefreshToken !== user.refreshToken) {
+      return res.status(403).json({ message: "Refresh token expired/invalid" });
     }
 
-    const { accessToken, NewRefreshToken } =
+    // generate new tokens
+    const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshToken(user._id);
+
+    // Save new refresh in DB
+    user.refreshToken = newRefreshToken;
+    await user.save();
 
     return res
       .status(200)
       .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", NewRefreshToken, options)
-      .json(
-        new ApiResponse(
-          200,
-          { user: loggedInUser, accessToken, refreshToken: NewRefreshToken },
-          "access token refresh successfully",
-        ),
-      );
-  } catch (error) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+      .cookie("refreshToken", newRefreshToken, options)
+      .json({
+        success: true,
+        user: { _id: user._id, email: user.email },
+        accessToken,
+      });
+  } catch (err) {
+    return res
+      .status(403)
+      .json({ message: "Invalid or expired refresh token" });
   }
 };
 
@@ -188,14 +193,13 @@ const sendOTP = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    const otp = 5431;
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
     user.resetOtp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000;
     user.isOtpVerified = false;
     await user.save();
-
-    // await sendOtpMail(email, otp);
+    await sendOtpMail(email, otp);
 
     return res.json(new ApiResponse(200, {}, "otp send Successfully"));
   } catch (error) {

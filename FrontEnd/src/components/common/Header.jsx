@@ -13,7 +13,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Avatar,  AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export default function Header({ setOpenLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -103,7 +103,7 @@ export default function Header({ setOpenLogin }) {
                     asChild
                     className={navigationMenuTriggerStyle()}
                   >
-                    <Link to="/contact">Contact Us</Link>
+                    <Link to="/contact-us">Contact Us</Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               </NavigationMenuList>
@@ -220,10 +220,10 @@ export default function Header({ setOpenLogin }) {
             </Link>
 
             <Link
-              to="/contact"
+              to="/contact-us"
               onClick={() => setMobileOpen(false)}
               className={`px-3 py-2.5 rounded-lg transition-colors font-medium ${
-                isActive("/contact")
+                isActive("/contact-us")
                   ? "bg-green-50 text-green-600"
                   : "hover:bg-green-50 hover:text-green-600"
               }`}

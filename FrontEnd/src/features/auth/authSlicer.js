@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   signup,
   login,
-  refreshToken,
   getMe,
   logout,
   verifyOtp,
@@ -20,7 +19,6 @@ const initialState = {
 
 const authSlice = createSlice({
   name: "auth",
-
   initialState,
   reducers: {
     setUserData: (state, action) => {
@@ -31,12 +29,12 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Signup
     builder
+      // Signup
       .addCase(signup.pending, (state) => {
         state.loading = true;
       })
-      .addCase(signup.fulfilled, (state, action) => {
+      .addCase(signup.fulfilled, (state) => {
         state.loading = false;
       })
       .addCase(signup.rejected, (state, action) => {
@@ -45,33 +43,33 @@ const authSlice = createSlice({
       })
 
       // Login
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-      })
-      .addCase(login.pending, (state) => {
-        state.loading = true;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // Refresh Token
-      .addCase(refreshToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload.data.accessToken;
-        state.refreshToken = action.payload.data.refreshToken;
+      // Get Me
+      .addCase(getMe.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getMe.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(getMe.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.error = action.payload;
       })
 
-      // Get Me
-      .addCase(getMe.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.hasFetchedUser = true;
-      })
-      .addCase(getMe.rejected, (state) => {
-        state.hasFetchedUser = true;
-      })
-      // Logout
+      // Logout thunk
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
       })
@@ -79,12 +77,12 @@ const authSlice = createSlice({
         state.user = null;
       })
 
-      // --- OTP flow ---
+      // OTP flow
       .addCase(sendOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(sendOtp.fulfilled, (state, action) => {
+      .addCase(sendOtp.fulfilled, (state) => {
         state.loading = false;
         state.otpSent = true;
       })
@@ -97,7 +95,7 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(verifyOtp.fulfilled, (state, action) => {
+      .addCase(verifyOtp.fulfilled, (state) => {
         state.loading = false;
         state.otpVerified = true;
       })
@@ -110,7 +108,7 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(reset_password.fulfilled, (state, action) => {
+      .addCase(reset_password.fulfilled, (state) => {
         state.loading = false;
         state.otpSent = false;
         state.otpVerified = false;

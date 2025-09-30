@@ -1,5 +1,5 @@
-import { setUserData } from "../features/auth/authSlicer";
 import { getMe } from "../features/auth/authThunk";
+// import { setUserData } from "../features/auth/authSlicer";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
@@ -10,10 +10,14 @@ function useGetCurrentUser() {
     const fetchUser = async () => {
       try {
         const res = await dispatch(getMe()).unwrap();
-        dispatch(setUserData(res.data));
+        // if (res?.data?.user) {
+        // dispatch(setUserData({ user: res.data.user }));
+        // }
+
         console.log(res.data);
       } catch (error) {
         console.error("Error fetching user:", error);
+        // dispatch(logoutUser());
       }
     };
 

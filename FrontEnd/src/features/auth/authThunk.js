@@ -28,19 +28,6 @@ export const login = createAsyncThunk(
   }
 );
 
-// Refresh Token
-export const refreshToken = createAsyncThunk(
-  "auth/refreshToken",
-  async (refreshToken, { rejectWithValue }) => {
-    try {
-      const res = await API.post("/refresh-token", { token: refreshToken });
-      return res.data;
-    } catch (err) {
-      return rejectWithValue("Token refresh failed");
-    }
-  }
-);
-
 // Get Current User
 export const getMe = createAsyncThunk(
   "auth/getMe",
