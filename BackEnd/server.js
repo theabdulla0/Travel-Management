@@ -22,6 +22,7 @@ app.use("/api", require("./routes/image.route"));
 app.use((req, res) => {
   res.send("404! Page not Found");
 });
+
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   connectDB();

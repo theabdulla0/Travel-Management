@@ -35,8 +35,6 @@ const tripSlice = createSlice({
       .addCase(AiGenerateTrip.fulfilled, (state, action) => {
         state.loading = false;
         state.tripPlan = action.payload;
-
-
       })
       .addCase(AiGenerateTrip.rejected, (state, action) => {
         state.loading = false;

@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const tripSchema = new mongoose.Schema(
   {
     tripDetails: {
-      type: Object,
-      trim: true,
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

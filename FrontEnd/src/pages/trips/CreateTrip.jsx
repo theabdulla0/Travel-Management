@@ -15,7 +15,7 @@ function CreateTrip() {
           <TripChatBot setTripPlan={setTripPlan} />
         </div>
         <div>
-          <ViewTrip trip={tripPlan} />
+          <ViewTrip trip={tripPlan?.tripDetails} />
         </div>
       </div>
     </LayoutCommon>

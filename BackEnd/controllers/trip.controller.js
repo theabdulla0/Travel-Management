@@ -1,6 +1,7 @@
 const Trip = require("../models/trip.model");
 const User = require("../models/user.model");
 const { ApiResponse } = require("../utils/ApiResponse");
+const fetchImage = require("../utils/ImageSearchSerpAPI");
 
 const { GoogleGenAI } = require("@google/genai");
 
@@ -9,7 +10,11 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const generateAiPlanner = async (req, res) => {
   try {
     const plan = req.body;
-    if (!plan) return res.status(404).json({ message: "Plan not found", plan });
+    if (!plan)
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Plan not provided"));
+
     const prompt = `
     You are an AI Trip Planner Agent.
     
@@ -84,37 +89,103 @@ const generateAiPlanner = async (req, res) => {
     - Keep text short and UI-friendly.
     - Do not include anything outside the JSON object.
 `;
-
+    // --- Call Gemini ---
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: prompt,
     });
 
-    let text = response.text;
-
+    let text = response?.text || "";
     const cleaned = text.replace(/```json\s*|\s*```/g, "").trim();
+
     let parsed;
     try {
       parsed = JSON.parse(cleaned);
     } catch (err) {
-      console.error("JSON parse failed. Raw:", cleaned);
+      console.error("JSON parse failed. Raw AI output:", cleaned.slice(0, 500));
       return res
         .status(500)
-        .json({ message: "Invalid JSON from AI", raw: cleaned });
+        .json(new ApiResponse(500, null, "AI returned invalid JSON"));
     }
 
-    return res.status(200).json(parsed);
+    const { itinerary = [], recommendations = {}, destination = {} } = parsed;
+    const { hotels: recHotels = [], restaurants: recRestaurants = [] } =
+      recommendations;
+
+    // --- Image fetching promises generator ---
+    const imagePromises = [];
+
+    itinerary.forEach((day) => {
+      // Add activity images
+      day.activities?.forEach((act) => {
+        imagePromises.push(
+          fetchImage(
+            `${act.name}, ${destination.city}, ${destination.country}`,
+          ).then((img) => {
+            act.image = img;
+          }),
+        );
+      });
+
+      // Add hotel image
+      if (day.hotel?.name) {
+        imagePromises.push(
+          fetchImage(
+            `${day.hotel.name}, ${destination.city}, ${destination.country}`,
+          ).then((img) => {
+            day.hotel.image = img;
+          }),
+        );
+      }
+
+      // Add meal images
+      day.meals?.forEach((meal) => {
+        imagePromises.push(
+          fetchImage(
+            `${meal.name}, ${destination.city}, ${destination.country}`,
+          ).then((img) => {
+            meal.image = img;
+          }),
+        );
+      });
+    });
+
+    // Recommendations images
+    recHotels.forEach((hotel) => {
+      imagePromises.push(
+        fetchImage(
+          `${hotel.name}, ${destination.city}, ${destination.country}`,
+        ).then((img) => {
+          hotel.image = img;
+        }),
+      );
+    });
+    recRestaurants.forEach((restaurant) => {
+      imagePromises.push(
+        fetchImage(
+          `${restaurant.name}, ${destination.city}, ${destination.country}`,
+        ).then((img) => {
+          restaurant.image = img;
+        }),
+      );
+    });
+
+    // --- Await all images in parallel ---
+    await Promise.all(imagePromises);
+
+    console.log("plan backend", parsed);
+
+    res.json(new ApiResponse(200, { plan: parsed }));
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "failed to generate", error: error.message });
+    console.error("Planner error:", error);
+    res.json(new ApiResponse(500, null, error.message));
   }
 };
 
 const SaveTrips = async (req, res) => {
   try {
     const { plan } = req.body;
-
+    console.log("save trip", plan);
     if (!plan) {
       return res.status(400).json({ message: "Trip details are required" });
     }
@@ -122,9 +193,11 @@ const SaveTrips = async (req, res) => {
       tripDetails: plan,
       createdBy: req.user._id,
     });
+    console.log("newTrp", newTrip);
     const user = await User.findById(req.user._id);
     user.trips.push(newTrip._id);
     await user.save();
+
     return res.json(
       new ApiResponse(299, {
         message: "Trip saved successfully",
@@ -143,15 +216,19 @@ const ViewAllUserTrips = async (req, res) => {
   try {
     const userId = req.user._id.toString();
     const trips = await Trip.find({ createdBy: userId });
-    if (!trips) {
-      return res.json(new ApiResponse(404, null, "Trip not found"));
+
+    if (!trips || trips.length === 0) {
+      return res.status(404).json(new ApiResponse(404, [], "No trips found"));
     }
-    return res.json(new ApiResponse(299, trips, "Server Error"));
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, trips, "Trips fetched successfully"));
   } catch (error) {
     console.error(error);
-    return res.json(
-      new ApiResponse(500, { error: error.message }, "Server Error"),
-    );
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, error.message || "Server Error"));
   }
 };
 
