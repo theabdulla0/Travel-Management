@@ -40,7 +40,7 @@ const generateAiPlanner = async (req, res) => {
               "name": "string",
               "description": "string",
               "mapLink": "https://www.google.com/maps/search/?api=1&query=<PLACE_NAME>,<CITY>,<COUNTRY>",
-              
+      
             }
           ],
           "hotel": {
@@ -105,7 +105,6 @@ const generateAiPlanner = async (req, res) => {
 
     return res.status(200).json(parsed);
   } catch (error) {
-
     return res
       .status(500)
       .json({ message: "failed to generate", error: error.message });

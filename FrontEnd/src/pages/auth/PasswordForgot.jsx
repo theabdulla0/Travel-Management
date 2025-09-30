@@ -14,7 +14,7 @@ import {
   reset_password,
 } from "../../features/auth/authThunk";
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("nad7140@gmail.com");
   const [password, setPassword] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,46 +24,77 @@ export default function ForgotPassword() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (step === 1 && !email) {
+    if (!email) {
       toast.error("Please enter your email address.");
       return;
     }
     try {
       setLoading(true);
       if (step === 1) {
-        await dispatch(sendOtp({ email }))
-          .unwrap()
-          .then((res) => {
-            toast.success(res.message || "OTP send to mail!");
-            setStep(2);
-          });
-      } else if (step === 2) {
-        // verify OTP logic here
-        if (!otp) {
-          toast.error("Enter OTP first");
-          return;
+        const res = await dispatch(sendOtp({ email })).unwrap();
+        if (res.success) {
+          toast.success(res?.message || "OTP sent to email!");
+          setStep(2);
+        } else {
+          toast.error(res?.message?.error);
         }
-        const res = await dispatch(verifyOtp({ email, otp }))
-          .unwrap()
-          .then((res) => res);
-        toast.success(res.message || "OTP verified!");
-        setStep(3);
-      } else if (step === 3) {
-        if (password !== confirmPassword) {
-          toast.error("Passwords do not match.");
-          return;
+      }
+    } catch (error) {
+      console.error("Send OTP error:", error);
+      toast.error(error?.message || "Failed to send OTP.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otp) {
+      toast.error("Please enter your OTP.");
+      return;
+    }
+    try {
+      setLoading(true);
+      if (step === 2) {
+        const res = await dispatch(verifyOtp({ email, otp })).unwrap();
+        if (res?.success) {
+          toast.success(res?.message || "OTP verified!");
+          setStep(3);
+        } else {
+          toast.error(res?.message?.error || "OTP verification failed");
         }
-        // reset password API call here
-        await dispatch(
+      }
+    } catch (error) {
+      console.error("Verify OTP error:", error);
+      toast.error(error?.message || "Invalid OTP.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+    try {
+      setLoading(true);
+      if (step === 3) {
+        const res = await dispatch(
           reset_password({ email, oldPassword, password })
         ).unwrap();
-        toast.success("Password reset successfully!");
-        setStep(1); // reset flow back to start
-        navigate("/");
+        if (res?.success) {
+          toast.success(res?.message || "Password reset successfully!");
+          navigate("/");
+        } else {
+          toast.error(res?.message?.error || "Password reset failed");
+        }
       }
     } catch (err) {
+      console.error("Reset password error:", err);
       toast.error(err?.message || "Something went wrong.");
     } finally {
       setLoading(false);
@@ -94,7 +125,7 @@ export default function ForgotPassword() {
               </p>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSendOtp} className="space-y-4">
                 <Input
                   type="email"
                   placeholder="Your email address"
@@ -118,7 +149,7 @@ export default function ForgotPassword() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <Label>OTP</Label>
                 <Input
                   type="number"
@@ -143,7 +174,7 @@ export default function ForgotPassword() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleResetPassword} className="space-y-4">
                 <Input
                   type="password"
                   placeholder="Old password"

@@ -2,7 +2,7 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { ApiResponse } = require("../utils/ApiResponse");
-const sendMail = require("../utils/sendMail");
+const { sendOtpMail } = require("../utils/sendMail");
 // const { OAuth2Client } = require("google-auth-library");
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -184,19 +184,19 @@ const logout = async (req, res) => {
 const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
+    console.log("backend email", email);
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    // const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const otp = 5431;
     user.resetOtp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000;
     user.isOtpVerified = false;
     await user.save();
-    await sendMail({
-      to: email,
-      subject: "Reset Your Password",
-      html: `<p>Your OTP of Password reset is <b>${otp}</b>. I will expire in 5 minutes</p>`,
-    });
+
+    // await sendOtpMail(email, otp);
+
     return res.json(new ApiResponse(200, {}, "otp send Successfully"));
   } catch (error) {
     return res.json(new ApiResponse(500, {}, { error: error.message }));
@@ -207,39 +207,69 @@ const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
     const user = await User.findOne({ email });
-    if (!user || user.resetOtp !== otp || user.otpExpires < Date.now())
-      return res.json(new ApiResponse(400, {}, { error: error.message }));
+
+    if (!user) {
+      return res.status(404).json(new ApiResponse(404, {}, "User not found"));
+    }
+
+    if (user.resetOtp !== otp) {
+      return res.status(400).json(new ApiResponse(400, {}, "Invalid OTP"));
+    }
+
+    if (user.otpExpires < Date.now()) {
+      return res.status(400).json(new ApiResponse(400, {}, "OTP has expired"));
+    }
+
     user.isOtpVerified = true;
     user.resetOtp = undefined;
     user.otpExpires = undefined;
     await user.save();
-    return res.json(new ApiResponse(200, {}, "otp verified Successfully"));
+
+    return res.json(new ApiResponse(200, {}, "OTP verified successfully"));
   } catch (error) {
-    return res.json(new ApiResponse(500, {}, { error: error.message }));
+    // Fixed: Pass error message as string, not object
+    return res
+      .status(500)
+      .json(new ApiResponse(500, {}, error.message || "Failed to verify OTP"));
   }
 };
 
-//  Reset Password
+// Reset Password
 const resetPassword = async (req, res) => {
   try {
-    const { email, oldPassword, newPassword } = req.body;
+    const { email, oldPassword, password } = req.body; // Changed newPassword to password to match frontend
 
     const user = await User.findOne({ email });
-    if (!email || !user.isOtpVerified) {
-      return res.json(new ApiResponse(400, {}, "Otp verified required"));
-    }
-    const isOldPasswordCorrect = await user.isPasswordCorrect(oldPassword);
-    if (!isOldPasswordCorrect) {
-      return res.json(new ApiResponse(400, {}, "Old Password incorrect"));
+
+    if (!user) {
+      return res.status(404).json(new ApiResponse(404, {}, "User not found"));
     }
 
-    user.password = newPassword;
+    if (!user.isOtpVerified) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, {}, "OTP verification required"));
+    }
+
+    const isOldPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+    if (!isOldPasswordCorrect) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, {}, "Old password is incorrect"));
+    }
+
+    user.password = password; // Changed from newPassword to password
     user.isOtpVerified = false;
     await user.save({ validateBeforeSave: false });
 
     return res.json(new ApiResponse(200, {}, "Password changed successfully"));
   } catch (error) {
-    return res.json(new ApiResponse(500, {}, { error: error.message }));
+    // Fixed: Pass error message as string, not object
+    return res
+      .status(500)
+      .json(
+        new ApiResponse(500, {}, error.message || "Failed to reset password"),
+      );
   }
 };
 

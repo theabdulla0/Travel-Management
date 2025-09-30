@@ -60,7 +60,7 @@ export const logout = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      await API.post("/logout", { withCredentials: true });
+      await API.post("/logout");
       return true;
     } catch (err) {
       return rejectWithValue("Logout failed");
@@ -70,14 +70,17 @@ export const logout = createAsyncThunk(
 
 export const sendOtp = createAsyncThunk(
   "auth/sendOtp",
-  async (email, { rejectWithValue }) => {
+  async ({ email }, { rejectWithValue }) => {
     try {
       const res = await API.post("/send-otp", { email });
       return res.data;
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to send OTP"
-      );
+      // Handle both string and object error messages
+      const errorMessage =
+        typeof err.response?.data?.message === "string"
+          ? err.response?.data?.message
+          : err.response?.data?.message?.error || "Failed to send OTP";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -86,7 +89,9 @@ export const verifyOtp = createAsyncThunk(
   "auth/verifyOtp",
   async ({ email, otp }, { rejectWithValue }) => {
     try {
+      console.log("verify OTP Thunk", email, otp);
       const res = await API.post("/verify-otp", { email, otp });
+      console.log("verify OTP Thunk", res.data);
       return res.data;
     } catch (err) {
       return rejectWithValue(
@@ -95,11 +100,16 @@ export const verifyOtp = createAsyncThunk(
     }
   }
 );
+
 export const reset_password = createAsyncThunk(
   "auth/reset_password",
-  async (formData, { rejectWithValue }) => {
+  async ({ email, oldPassword, password }, { rejectWithValue }) => {
     try {
-      const res = await API.post("/reset-password", formData);
+      const res = await API.post("/reset-password", {
+        email,
+        oldPassword,
+        password,
+      });
       return res.data;
     } catch (err) {
       return rejectWithValue(

@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { IoSend } from "react-icons/io5";
 import { SaveTrip, AiGenerateTrip } from "../../features/trips/tripThunk";
 import { useDispatch } from "react-redux";
+import Loader from "../common/Loader";
 
 function TripChatBot({ setTripPlan }) {
   const [messages, setMessages] = useState([]);
@@ -65,13 +66,12 @@ function TripChatBot({ setTripPlan }) {
 
       // Generate trip plan
       const aiPlan = await dispatch(AiGenerateTrip(allAnswers)).unwrap();
-   
+
       setTripPlan(aiPlan);
 
       // Save trip plan to database
       try {
         const saveResponse = await dispatch(SaveTrip(aiPlan)).unwrap();
-  
       } catch (saveErr) {
         console.error("Failed to save trip:", saveErr.response?.data);
         setMessages((prev) => [
@@ -190,7 +190,7 @@ function TripChatBot({ setTripPlan }) {
         {loading && (
           <div className="flex justify-start mt-2">
             <div className="bg-gray-300 px-4 py-2 rounded-xl shadow-sm">
-              <LoadingDots />
+              <Loader />
             </div>
           </div>
         )}
