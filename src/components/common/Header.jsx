@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/features/auth/authThunk";
 import {
   NavigationMenu,
@@ -13,16 +13,14 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getMe } from "../../features/auth/authThunk";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export default function Header({ setOpenLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, refreshToken, hasFetchedUser } = useSelector(
-    (state) => state.auth
-  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useSelector((state) => state.auth);
 
   const tripComponents = [
     { title: "Create Trip", href: "/create-trip" },
@@ -32,42 +30,32 @@ export default function Header({ setOpenLogin }) {
     { title: "Reports", href: "/reports" },
   ];
 
-  useEffect(() => {
-    if (!user && !hasFetchedUser) {
-      dispatch(getMe());
-    }
-  }, [dispatch, user, hasFetchedUser]);
-
-  const handleProtectedClick = (path) => {
-    if (!user) {
-      setOpenLogin(true);
-      return;
-    }
-    navigate(path);
-  };
-
-  const handleLogout = () => {
-    dispatch(logout(refreshToken));
+  const handleLogout = async () => {
+    await dispatch(logout());
     navigate("/");
+    setMobileOpen(false);
   };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <>
-      <header className="w-full bg-white shadow-md fixed top-0 left-0 z-50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-6 md:px-10">
-          {/* Logo */}
-          <div className="flex items-center">
-            <img className="h-8 md:h-10" src="./logo.svg" alt="Logo" />
-          </div>
+      <header className="w-full bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 fixed top-0 left-0 z-50">
+        <div className="max-w-7xl mx-auto flex justify-between items-center py-3 sm:py-4 px-4 sm:px-6 lg:px-8">
+          <Link to="/" className="flex items-center group">
+            <img
+              className="h-8 sm:h-9 lg:h-10 transition-transform duration-300 group-hover:scale-105"
+              src="./logo.svg"
+              alt="Logo"
+            />
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center w-full">
-            {/* Left Spacer */}
             <div className="flex-1" />
 
-            {/* Centered Menu Items */}
             <NavigationMenu>
-              <NavigationMenuList className="flex items-center space-x-6">
+              <NavigationMenuList className="flex items-center space-x-1 lg:space-x-2">
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
@@ -78,18 +66,22 @@ export default function Header({ setOpenLogin }) {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger>Trips</NavigationMenuTrigger>
+                  <NavigationMenuTrigger
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Trips
+                  </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <ul className="grid gap-2 w-[200px]">
+                    <ul className="grid gap-1 p-2 w-[220px]">
                       {tripComponents.map((item) => (
                         <li key={item.href}>
                           <NavigationMenuLink asChild>
-                            <button
-                              className="block px-2 py-1 hover:bg-gray-100 rounded text-left w-full"
-                              onClick={() => handleProtectedClick(item.href)}
+                            <Link
+                              to={item.href}
+                              className={navigationMenuTriggerStyle()}
                             >
                               {item.title}
-                            </button>
+                            </Link>
                           </NavigationMenuLink>
                         </li>
                       ))}
@@ -111,45 +103,40 @@ export default function Header({ setOpenLogin }) {
                     asChild
                     className={navigationMenuTriggerStyle()}
                   >
-                    <Link to="/contact">Contact Us</Link>
+                    <Link to="/contact-us">Contact Us</Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
 
-            {/* Right: Profile / Sign In */}
-            <div className="flex-1 flex justify-end">
+            {/* Profile / Auth Section */}
+            <div className="flex-1 flex justify-end items-center">
               {user ? (
                 <NavigationMenu>
                   <NavigationMenuList>
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger>
-                        <Avatar>
-                          <AvatarImage src="https://github.com/shadcn.png" />
-                          <AvatarFallback>CN</AvatarFallback>
+                      <NavigationMenuTrigger className="gap-2 flex items-center">
+                        <Avatar className="h-8 w-8 border-2 border-green-600">
+                          <AvatarImage src={"https://github.com/shadcn.png"} />
                         </Avatar>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
-                        <ul className="grid gap-2 w-[150px]">
+                        <ul className="grid gap-1 p-2 w-[180px]">
                           <li>
-                            <NavigationMenuLink asChild>
-                              <button
-                                className="block px-2 py-1 hover:bg-gray-100 rounded text-left w-full"
-                                onClick={() => navigate("/profile")}
-                              >
-                                Profile
-                              </button>
-                            </NavigationMenuLink>
+                            <Link
+                              to="/profile"
+                              className="block w-full px-3 py-2.5 hover:bg-green-50 hover:text-green-600 rounded-lg text-left transition-colors font-medium text-sm"
+                            >
+                              Profile
+                            </Link>
                           </li>
                           <li>
-                            <NavigationMenuLink asChild>
-                              <button
-                                className="block px-2 py-1 hover:bg-gray-100 rounded text-left w-full"
-                                onClick={handleLogout}
-                              >
-                                Logout
-                              </button>
-                            </NavigationMenuLink>
+                            <button
+                              onClick={handleLogout}
+                              className="block w-full px-3 py-2.5 hover:bg-red-50 hover:text-red-600 rounded-lg text-left transition-colors font-medium text-sm"
+                            >
+                              Logout
+                            </button>
                           </li>
                         </ul>
                       </NavigationMenuContent>
@@ -166,7 +153,8 @@ export default function Header({ setOpenLogin }) {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="text-gray-700 focus:outline-none"
+              className="text-gray-700 hover:text-green-600 focus:outline-none p-2 rounded-lg hover:bg-gray-100 transition-all"
+              aria-label="Toggle menu"
             >
               {mobileOpen ? <HiX size={28} /> : <HiMenu size={28} />}
             </button>
@@ -174,60 +162,106 @@ export default function Header({ setOpenLogin }) {
         </div>
 
         {/* Mobile Menu */}
-        {mobileOpen && (
-          <div className="md:hidden bg-white shadow-md">
-            <nav className="flex flex-col px-6 py-4 space-y-3">
+        <div
+          className={`md:hidden bg-white border-t border-gray-100 overflow-hidden transition-all duration-300 ${
+            mobileOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <nav className="flex flex-col px-4 py-4 space-y-1">
+            {/* User Info for Mobile */}
+            {user && (
+              <div className="flex items-center gap-3 px-3 py-3 bg-green-50 rounded-lg mb-3">
+                <Avatar className="h-10 w-10 border-2 border-green-600">
+                  <AvatarImage src={"https://github.com/shadcn.png"} />
+                </Avatar>
+              </div>
+            )}
+
+            <Link
+              to="/"
+              onClick={() => setMobileOpen(false)}
+              className={`px-3 py-2.5 rounded-lg transition-colors font-medium ${
+                isActive("/")
+                  ? "bg-green-50 text-green-600"
+                  : "hover:bg-green-50 hover:text-green-600"
+              }`}
+            >
+              Home
+            </Link>
+
+            <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Trips
+            </div>
+            {tripComponents.map((item) => (
               <Link
-                to="/"
+                key={item.href}
+                to={item.href}
                 onClick={() => setMobileOpen(false)}
-                className="hover:text-gray-900 transition"
+                className={`text-left px-4 py-2.5 rounded-lg transition-colors font-medium w-full ${
+                  isActive(item.href)
+                    ? "bg-green-50 text-green-600"
+                    : "hover:bg-green-50 hover:text-green-600"
+                }`}
               >
-                Home
+                {item.title}
               </Link>
-              {tripComponents.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => {
-                    setMobileOpen(false);
-                    handleProtectedClick(item.href);
-                  }}
-                  className="text-left hover:text-gray-900 transition w-full"
-                >
-                  {item.title}
-                </button>
-              ))}
+            ))}
+
+            <Link
+              to="/about"
+              onClick={() => setMobileOpen(false)}
+              className={`px-3 py-2.5 rounded-lg transition-colors font-medium ${
+                isActive("/about")
+                  ? "bg-green-50 text-green-600"
+                  : "hover:bg-green-50 hover:text-green-600"
+              }`}
+            >
+              About
+            </Link>
+
+            <Link
+              to="/contact-us"
+              onClick={() => setMobileOpen(false)}
+              className={`px-3 py-2.5 rounded-lg transition-colors font-medium ${
+                isActive("/contact-us")
+                  ? "bg-green-50 text-green-600"
+                  : "hover:bg-green-50 hover:text-green-600"
+              }`}
+            >
+              Contact Us
+            </Link>
+
+            <div className="pt-3 border-t border-gray-200 mt-2 space-y-2">
               {user ? (
                 <>
                   <Link
                     to="/profile"
                     onClick={() => setMobileOpen(false)}
-                    className="hover:text-gray-900 transition"
+                    className="block w-full px-3 py-2.5 border border-green-600 text-green-600 hover:bg-green-50 rounded-lg font-semibold text-center"
                   >
                     Profile
                   </Link>
-                  <Button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      handleLogout();
-                    }}
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full px-3 py-2.5 border border-red-600 text-red-600 hover:bg-red-50 rounded-lg font-semibold text-center"
                   >
                     Logout
-                  </Button>
+                  </button>
                 </>
               ) : (
                 <Button
-                  className="w-full mt-2"
                   onClick={() => {
                     setMobileOpen(false);
                     setOpenLogin(true);
                   }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
                 >
                   Sign In
                 </Button>
               )}
-            </nav>
-          </div>
-        )}
+            </div>
+          </nav>
+        </div>
       </header>
     </>
   );

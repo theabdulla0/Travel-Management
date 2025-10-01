@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const TripAPI = axios.create({
-  baseURL: "http://localhost:3000/api/trip",
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/trip`,
   withCredentials: true,
 });
 

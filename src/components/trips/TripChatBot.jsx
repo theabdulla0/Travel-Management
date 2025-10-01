@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { IoSend } from "react-icons/io5";
-import axios from "axios";
-import { HiChevronDown, HiChevronUp } from "react-icons/hi";
+import { SaveTrip, AiGenerateTrip } from "../../features/trips/tripThunk";
+import { useDispatch } from "react-redux";
+import Loader from "../common/Loader";
 
 function TripChatBot({ setTripPlan }) {
   const [messages, setMessages] = useState([]);
@@ -12,8 +13,9 @@ function TripChatBot({ setTripPlan }) {
   const [started, setStarted] = useState(false);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
-  const [expandedDay, setExpandedDay] = useState(null);
   const messagesEndRef = useRef(null);
+
+  const dispatch = useDispatch();
 
   const questions = [
     { text: "Where are you starting from?" },
@@ -41,20 +43,6 @@ function TripChatBot({ setTripPlan }) {
     { text: "Any special requirements or preferences?" },
   ];
 
-  useEffect(() => {
-    if (messages.length) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
-  const LoadingDots = () => (
-    <div className="flex space-x-1 animate-pulse">
-      <span className="w-2 h-2 bg-gray-700 rounded-full"></span>
-      <span className="w-2 h-2 bg-gray-700 rounded-full"></span>
-      <span className="w-2 h-2 bg-gray-700 rounded-full"></span>
-    </div>
-  );
-
   const startPlan = () => {
     setMessages([
       { role: "user", content: "Create New Trip" },
@@ -63,69 +51,83 @@ function TripChatBot({ setTripPlan }) {
     setStarted(true);
   };
 
+  const normalizeGroupSize = (answer = "") => {
+    if (answer.includes("Solo")) return "Solo";
+    if (answer.includes("Couple")) return "Couple";
+    if (answer.includes("Family")) return "Family";
+    if (answer.includes("Group")) return "Friends";
+    return "Solo";
+  };
+
+  const normalizeBudget = (answer = "") => {
+    if (answer.includes("Low")) return "Low";
+    if (answer.includes("Medium")) return "Medium";
+    if (answer.includes("High")) return "High";
+    return "Medium";
+  };
+
+  const buildStructuredPlan = (rawAnswers) => {
+    const destInput = rawAnswers[1] || "";
+    let city = destInput;
+    let country = "";
+
+    if (destInput.includes(",")) {
+      [city, country] = destInput.split(",").map((s) => s.trim());
+    }
+
+    return {
+      startingPoint: rawAnswers[0] || "",
+      destination: {
+        city: city || "",
+        country: country || "",
+      },
+      groupSize: normalizeGroupSize(rawAnswers[2]),
+      budgetCategory: normalizeBudget(rawAnswers[3]),
+      durationDays: Number(rawAnswers[4]) || 1,
+      interests: Array.isArray(rawAnswers[5])
+        ? rawAnswers[5]
+        : [rawAnswers[5] || ""],
+      specialRequirements: rawAnswers[6] || "",
+    };
+  };
+
   const submitAllAnswers = async (allAnswers) => {
     try {
       setLoading(true);
-      // Generate trip plan
-      console.log(
-        "TripChatBot: Sending to /api/ai at",
-        new Date().toLocaleString(),
-        ":",
-        { plan: allAnswers }
-      );
-      const response = await axios.post("http://localhost:3000/api/ai", {
-        plan: allAnswers,
-      }); // Cookies sent automatically
-      const aiPlan = response.data || {
-        error: "No trip plan received from server.",
-      };
-      console.log(
-        "TripChatBot: Received from /api/ai at",
-        new Date().toLocaleString(),
-        ":",
-        aiPlan
-      );
 
-      // Update parent component with trip plan
+      // 1. Build structured plan
+      const plan = buildStructuredPlan(allAnswers);
+
+      // 2. Generate trip via AI
+      const aiPlan = await dispatch(AiGenerateTrip(plan)).unwrap();
+      console.log("AI PLAN", aiPlan);
       setTripPlan(aiPlan);
 
-      // Save trip plan to database
+      // 3. Save trip to DB
       try {
-        const saveResponse = await axios.post(
-          "http://localhost:3000/api/trip/save-trip",
-          {
-            plan: aiPlan,
-          },
-          { withCredentials: true }
-        ); // Cookies sent automatically
-        console.log(saveResponse.data);
+        const res = await dispatch(SaveTrip(aiPlan)).unwrap();
+        if (res.success) {
+          console.log("trips saved");
+        } else {
+          console.log(res.error);
+        }
       } catch (saveErr) {
-        console.error(
-          "TripChatBot: Failed to save trip at",
-          new Date().toLocaleString(),
-          ":",
-          {
-            message: saveErr.message,
-            response: saveErr.response?.data,
-            status: saveErr.response?.status,
-          }
-        );
+        console.error("Failed to save trip:", saveErr.response?.data);
         setMessages((prev) => [
           ...prev,
-          {
-            role: "assistant",
-            content:
-              "Trip plan generated but failed to save to database. You can still view it below.",
-          },
+          { role: "assistant", content: "Plan generated but DB save failed." },
         ]);
       }
 
-      setMessages((prev) => [
-        ...prev.filter(
-          (msg) => !msg.content.includes("generating the best possible trip")
-        ),
-      ]);
+      // 🚮 Remove "generating trip" placeholder
+      setMessages((prev) =>
+        prev.filter(
+          (msg) =>
+            !msg.content.includes("Generating and saving your trip plan...")
+        )
+      );
     } catch (err) {
+      console.error(err);
       setMessages((prev) => [
         ...prev,
         {
@@ -143,8 +145,9 @@ function TripChatBot({ setTripPlan }) {
     if (!answer) return;
 
     const newMessages = [...messages, { role: "user", content: answer }];
-    setMessages(newMessages);
     const newAnswers = [...answers, answer];
+
+    setMessages(newMessages);
     setAnswers(newAnswers);
 
     if (currentQIndex < questions.length - 1) {
@@ -160,8 +163,7 @@ function TripChatBot({ setTripPlan }) {
         ...newMessages,
         {
           role: "assistant",
-          content:
-            "Thanks for your answers! Generating and saving your trip plan...",
+          content: "Generating and saving your trip plan...",
         },
       ]);
       setTimeout(() => submitAllAnswers(newAnswers), 800);
@@ -169,9 +171,10 @@ function TripChatBot({ setTripPlan }) {
     setInput("");
   };
 
-  const toggleDay = (day) => {
-    setExpandedDay(expandedDay === day ? null : day);
-  };
+  // auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   if (!started) {
     return (
@@ -188,7 +191,6 @@ function TripChatBot({ setTripPlan }) {
   }
 
   const currentQuestion = questions[currentQIndex];
-  const tripPlanMessage = messages.find((msg) => msg.tripData);
 
   return (
     <div className="h-[80vh] flex flex-col border rounded-xl shadow-lg bg-white">
@@ -196,7 +198,9 @@ function TripChatBot({ setTripPlan }) {
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex mt-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex mt-3 ${
+              msg.role === "user" ? "justify-end" : "justify-start"
+            }`}
           >
             <div
               className={`max-w-[70%] px-4 py-2 rounded-xl shadow-sm ${
@@ -205,6 +209,7 @@ function TripChatBot({ setTripPlan }) {
                   : "bg-gray-200 text-gray-800 rounded-bl-none"
               }`}
             >
+              <div>{msg.content}</div>
               <span className="block text-xs text-gray-500 mt-1">
                 {new Date().toLocaleTimeString([], {
                   hour: "2-digit",
@@ -217,7 +222,7 @@ function TripChatBot({ setTripPlan }) {
         {loading && (
           <div className="flex justify-start mt-2">
             <div className="bg-gray-300 px-4 py-2 rounded-xl shadow-sm">
-              <LoadingDots />
+              <Loader />
             </div>
           </div>
         )}
@@ -225,7 +230,7 @@ function TripChatBot({ setTripPlan }) {
       </section>
 
       <section className="p-4 border-t bg-white flex-shrink-0">
-        {currentQuestion?.options && !tripPlanMessage ? (
+        {currentQuestion?.options ? (
           <div className="flex flex-wrap gap-2">
             {currentQuestion.options.map((opt) => (
               <Button
@@ -238,14 +243,13 @@ function TripChatBot({ setTripPlan }) {
               </Button>
             ))}
           </div>
-        ) : !tripPlanMessage ? (
+        ) : (
           <div className="relative">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your answer..."
-              className="w-full h-20 bg-gray-50 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-              autoFocus
+              className="w-full h-20 bg-gray-50 border border-gray-300 rounded-lg p-2"
             />
             <Button
               className="absolute bottom-2 right-2 p-2 rounded-full bg-blue-500 hover:bg-blue-600"
@@ -254,7 +258,7 @@ function TripChatBot({ setTripPlan }) {
               <IoSend className="h-5 w-5 text-white" />
             </Button>
           </div>
-        ) : null}
+        )}
       </section>
     </div>
   );

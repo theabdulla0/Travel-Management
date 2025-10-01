@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { logout } from "@/features/auth/authThunk";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import LayoutCommon from "@/components/common/LayoutCommon";
 
 export default function Profile() {

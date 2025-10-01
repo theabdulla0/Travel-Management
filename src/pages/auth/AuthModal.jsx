@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login, signup } from "../../features/auth/authThunk";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { setUserData } from "@/features/auth/authSlicer";
 
 function AuthModal({ open, setOpen }) {
   const [tab, setTab] = useState("login");
@@ -24,38 +25,39 @@ function AuthModal({ open, setOpen }) {
   const { loading } = useSelector((state) => state.auth);
 
   // --- Handlers ---
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Please enter both email and password.");
       return;
     }
-    dispatch(login({ email, password }))
-      .unwrap()
-      .then(() => {
-        toast.success("Logged in successfully!");
-        setOpen(false);
-      })
-      .catch((err) => toast.error(err));
+    try {
+      const res = await dispatch(login({ email, password })).unwrap();
+      dispatch(setUserData(res.data));
+      toast.success("Logged in successfully!");
+      setOpen(false);
+    } catch (err) {
+      toast.error(err);
+    }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (!name || !email || !password) {
       toast.error("Please fill all fields.");
       return;
     }
-    dispatch(signup({ name, email, password }))
-      .unwrap()
-      .then(() => {
-        toast.success("Account created!");
-        setOpen(false);
-      })
-      .catch((err) => toast.error(err));
+    try {
+      await dispatch(signup({ name, email, password })).unwrap();
+      toast.success("Account created!");
+      setOpen(false);
+    } catch {
+      toast.error("Account creation failed.");
+      toast.error(err);
+    }
   };
 
   const googleLogin = () => {
-    console.log("Google OAuth flow here...");
     toast.info("Google login clicked");
   };
 

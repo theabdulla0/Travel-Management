@@ -6,9 +6,7 @@ export const signup = createAsyncThunk(
   "auth/signup",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await API.post("/signup", formData, {
-        withCredentials: true,
-      });
+      const res = await API.post("/signup", formData);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Signup failed");
@@ -21,23 +19,11 @@ export const login = createAsyncThunk(
   "auth/login",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await API.post("/login", formData, { withCredentials: true });
+      const res = await API.post("/login", formData);
+
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Login failed");
-    }
-  }
-);
-
-// Refresh Token
-export const refreshToken = createAsyncThunk(
-  "auth/refreshToken",
-  async (refreshToken, { rejectWithValue }) => {
-    try {
-      const res = await API.post("/refresh-token", { token: refreshToken });
-      return res.data;
-    } catch (err) {
-      return rejectWithValue("Token refresh failed");
     }
   }
 );
@@ -47,7 +33,8 @@ export const getMe = createAsyncThunk(
   "auth/getMe",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await API.get("/me", { withCredentials: true });
+      const res = await API.get("/me");
+
       return res.data;
     } catch (err) {
       return rejectWithValue("Failed to fetch user");
@@ -58,10 +45,9 @@ export const getMe = createAsyncThunk(
 // Logout
 export const logout = createAsyncThunk(
   "auth/logout",
-  async (_, { getState, rejectWithValue }) => {
-    const refreshToken = getState().auth.refreshToken;
+  async (_, { rejectWithValue }) => {
     try {
-      await API.post("/logout", { token: refreshToken });
+      await API.post("/logout");
       return true;
     } catch (err) {
       return rejectWithValue("Logout failed");
@@ -69,26 +55,53 @@ export const logout = createAsyncThunk(
   }
 );
 
-export const forgot_password = createAsyncThunk(
-  "auth/forgot_password",
-  async (email, { rejectWithValue }) => {
+export const sendOtp = createAsyncThunk(
+  "auth/sendOtp",
+  async ({ email }, { rejectWithValue }) => {
     try {
-      const res = await API.post("/forgot-password", email);
+      const res = await API.post("/send-otp", { email });
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Login failed");
+      // Handle both string and object error messages
+      const errorMessage =
+        typeof err.response?.data?.message === "string"
+          ? err.response?.data?.message
+          : err.response?.data?.message?.error || "Failed to send OTP";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const verifyOtp = createAsyncThunk(
+  "auth/verifyOtp",
+  async ({ email, otp }, { rejectWithValue }) => {
+    try {
+      console.log("verify OTP Thunk", email, otp);
+      const res = await API.post("/verify-otp", { email, otp });
+      console.log("verify OTP Thunk", res.data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to verify OTP"
+      );
     }
   }
 );
 
 export const reset_password = createAsyncThunk(
   "auth/reset_password",
-  async (formData, { rejectWithValue }) => {
+  async ({ email, oldPassword, password }, { rejectWithValue }) => {
     try {
-      const res = await API.post("/reset-password", formData);
+      const res = await API.post("/reset-password", {
+        email,
+        oldPassword,
+        password,
+      });
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Login failed");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to reset password"
+      );
     }
   }
 );
