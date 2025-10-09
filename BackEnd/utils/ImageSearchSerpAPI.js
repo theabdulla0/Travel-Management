@@ -15,7 +15,7 @@ const fetchImage = async (query) => {
           // Prefer original, fallback to thumbnail
           resolve(results[0].original || results[0].thumbnail || null);
         } else {
-          console.warn("No images found for:", query);
+          
           resolve(null);
         }
       },

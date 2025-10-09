@@ -13,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { logout } from "@/features/auth/authThunk";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LayoutCommon from "@/components/common/LayoutCommon";
 
 export default function Profile() {
@@ -21,8 +21,8 @@ export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name || "");
-  const [phone, setPhone] = useState(user?.profile?.phone || "");
+  const [name, setName] = useState(user.data?.name || "");
+  const [phone, setPhone] = useState(user.data?.profile?.phone || "");
 
   const handleUpdate = () => {
     dispatch(updateProfile({ name, phone }))
@@ -66,7 +66,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <Label className="mb-2">Email</Label>
-                  <Input value={user?.email} disabled />
+                  <Input value={user.data?.email} disabled />
                 </div>
                 <div>
                   <Label className="mb-2">Phone</Label>

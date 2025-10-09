@@ -47,17 +47,21 @@ const signup = async (req, res) => {
     const createUser = await User.findById(user._id).select("_id name email");
 
     if (!createUser) {
-      return res
-        .status(500)
-        .json({ message: "Failed to registering the user" });
+      return res.json(
+        new ApiResponse(
+          400,
+          {},
+          { message: "Failed to registering the user" },
+          false,
+        ),
+      );
     }
     return res
       .status(201)
-      .json(new ApiResponse(200, {}, "user Register Successfully"));
+      .json(new ApiResponse(200, {}, "user Register Successfully", true));
   } catch (error) {
-    console.error(error);
     return res.json(
-      new ApiResponse(500, { error: error.message }, "Server Error"),
+      new ApiResponse(500, { error: error.message }, "Server Error", false),
     );
   }
 };
@@ -66,9 +70,10 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
 
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(400).json({ message: "User not found" });
     const isPasswordValid = await user.isPasswordCorrect(password);
     if (!isPasswordValid)
       return res.status(400).json({ message: "Invalid credentials" });
@@ -76,6 +81,7 @@ const login = async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id,
     );
+
     const loggedInUser = await User.findById(user._id).select(
       "-password -refreshToken",
     );
@@ -89,12 +95,12 @@ const login = async (req, res) => {
           200,
           { loggedInUser, accessToken, refreshToken },
           "user Logged In successfully",
+          true,
         ),
       );
   } catch (error) {
-    console.error(error);
     return res.json(
-      new ApiResponse(500, { error: error.message }, "Server Error"),
+      new ApiResponse(500, { error: error.message }, "Server Error", false),
     );
   }
 };
@@ -105,13 +111,13 @@ const getMe = async (req, res) => {
     const user = await User.findById(req.user._id).select(
       "-password -refreshToken",
     );
-    if (!user) return res.json(new ApiResponse(400, {}, "User not found"));
+    if (!user)
+      return res.json(new ApiResponse(400, {}, "User not found", false));
 
-    return res.json(new ApiResponse(200, user, ""));
+    return res.json(new ApiResponse(200, user, "", true));
   } catch (error) {
-    console.error(error);
     return res.json(
-      new ApiResponse(500, { error: error.message }, "Server Error"),
+      new ApiResponse(500, { error: error.message }, "Server Error", false),
     );
   }
 };
@@ -179,7 +185,6 @@ const logout = async (req, res) => {
       .clearCookie("refreshToken")
       .json(new ApiResponse(200, {}, "user logged out successfully"));
   } catch (error) {
-    console.error(error);
     return res.json(
       new ApiResponse(500, { error: error.message }, "Server Error"),
     );
@@ -189,7 +194,7 @@ const logout = async (req, res) => {
 const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
-    console.log("backend email", email);
+
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 

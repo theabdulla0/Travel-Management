@@ -102,7 +102,6 @@ const generateAiPlanner = async (req, res) => {
     try {
       parsed = JSON.parse(cleaned);
     } catch (err) {
-      console.error("JSON parse failed. Raw AI output:", cleaned.slice(0, 500));
       return res
         .status(500)
         .json(new ApiResponse(500, null, "AI returned invalid JSON"));
@@ -173,11 +172,8 @@ const generateAiPlanner = async (req, res) => {
     // --- Await all images in parallel ---
     await Promise.all(imagePromises);
 
-    console.log("plan backend", parsed);
-
     res.json(new ApiResponse(200, { plan: parsed }));
   } catch (error) {
-    console.error("Planner error:", error);
     res.json(new ApiResponse(500, null, error.message));
   }
 };
@@ -185,7 +181,7 @@ const generateAiPlanner = async (req, res) => {
 const SaveTrips = async (req, res) => {
   try {
     const { plan } = req.body;
-    console.log("save trip", plan);
+
     if (!plan) {
       return res.status(400).json({ message: "Trip details are required" });
     }
@@ -193,7 +189,7 @@ const SaveTrips = async (req, res) => {
       tripDetails: plan,
       createdBy: req.user._id,
     });
-    console.log("newTrp", newTrip);
+
     const user = await User.findById(req.user._id);
     user.trips.push(newTrip._id);
     await user.save();
@@ -205,7 +201,6 @@ const SaveTrips = async (req, res) => {
       }),
     );
   } catch (error) {
-    console.error("Error saving trip:", error);
     return res.json(
       new ApiResponse(500, { error: error.message }, "Server Error"),
     );
@@ -218,17 +213,18 @@ const ViewAllUserTrips = async (req, res) => {
     const trips = await Trip.find({ createdBy: userId });
 
     if (!trips || trips.length === 0) {
-      return res.status(404).json(new ApiResponse(404, [], "No trips found"));
+      return res
+        .status(404)
+        .json(new ApiResponse(404, [], "No trips found", false));
     }
 
     return res
       .status(200)
-      .json(new ApiResponse(200, trips, "Trips fetched successfully"));
+      .json(new ApiResponse(200, trips, "Trips fetched successfully", true));
   } catch (error) {
-    console.error(error);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, error.message || "Server Error"));
+      .json(new ApiResponse(500, null, error.message || "Server Error", false));
   }
 };
 

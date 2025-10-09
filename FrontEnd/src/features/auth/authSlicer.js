@@ -11,10 +11,11 @@ import {
 
 const initialState = {
   user: null,
-  loading: false,
+  loading: true,
   error: null,
   otpSent: false,
   otpVerified: false,
+  isFetched: false,
 };
 
 const authSlice = createSlice({
@@ -22,7 +23,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUserData: (state, action) => {
-      state.user = action.payload;
+      state.user = action.payload.user;
     },
     clearError: (state) => {
       state.error = null;
@@ -62,11 +63,13 @@ const authSlice = createSlice({
       .addCase(getMe.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.isFetched = true;
       })
       .addCase(getMe.rejected, (state, action) => {
         state.loading = false;
         state.user = null;
         state.error = action.payload;
+        state.isFetched = true;
       })
 
       // Logout thunk

@@ -15,7 +15,7 @@ router.get("/search-image", async (req, res) => {
 
     res.json(json);
   } catch (err) {
-    console.error("Error fetching image:", err);
+    
     res.status(500).json({ error: "Failed to fetch image" });
   }
 });

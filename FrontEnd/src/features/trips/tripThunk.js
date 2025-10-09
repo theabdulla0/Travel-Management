@@ -6,8 +6,8 @@ export const ViewTrips = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await TripAPI.get("/");
-      console.log("trip res thunk", res.data.data);
-      return res.data.data;
+
+      return res.data;
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Failed to fetch trip data"
@@ -34,9 +34,8 @@ export const SaveTrip = createAsyncThunk(
   "trips/SaveTrip",
   async (tripPlan, { rejectWithValue }) => {
     try {
-      console.log("trip Thunk", tripPlan);
       const res = await TripAPI.post("/save-trip", { plan: tripPlan });
-      console.log("trip res thunk", res.data);
+
       return res.data;
     } catch (err) {
       return rejectWithValue(

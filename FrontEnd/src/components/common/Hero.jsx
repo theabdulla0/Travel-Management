@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { SelectBudgetOptions } from "../../constants/options";
+import { toast } from "sonner";
 
 const Hero = () => {
   const [destination, setDestination] = useState("");
@@ -59,7 +60,7 @@ const Hero = () => {
         const data = await res.json();
         setSuggestions(data.data || []);
       } catch (err) {
-        console.error("Error fetching cities:", err);
+        toast.error("Error fetching cities");
       }
     };
 
@@ -79,19 +80,20 @@ const Hero = () => {
 
   return (
     <section
-      className="mt-3 sm:mt-5 rounded-xl sm:rounded-2xl overflow-hidden relative w-[95%] sm:w-[97%] max-w-[1300px] mx-auto h-[70vh] sm:h-[80vh] lg:h-[90vh] flex items-center justify-center"
+      className="relative w-full min-h-[60svh] sm:min-h-[70svh] lg:min-h-[80svh] flex items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl"
       style={{
         backgroundImage:
           "url('https://dreamstour.dreamstechnologies.com/html/assets/img/tours/home-banner-6.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="absolute inset-0 bg-black/40"></div>
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/50" />
 
-      <div className="relative z-10 text-center px-3 sm:px-4 w-full">
-        <h1 className="text-white font-extrabold text-2xl sm:text-4xl md:text-5xl lg:text-6xl max-w-3xl mx-auto leading-tight sm:leading-snug">
+      {/* Content */}
+      <div className="relative z-10 text-center w-full px-4 sm:px-6 max-w-[1300px]">
+        <h1 className="text-white font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight sm:leading-snug max-w-3xl mx-auto">
           Millions Of Experiences. One Simple Search.
         </h1>
         <p className="text-gray-200 text-sm sm:text-lg md:text-xl mt-2 sm:mt-4">
@@ -99,22 +101,26 @@ const Hero = () => {
         </p>
 
         {/* Search Box */}
-        <div className="mt-6  sm:mt-10 bg-white rounded-lg shadow-lg p-3 sm:p-4 md:p-6 w-full max-w-6xl mx-auto flex gap-3 sm:gap-4">
+        <div className="mt-6 sm:mt-10 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 sm:p-4 md:p-6 w-full max-w-6xl mx-auto grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-12 items-center">
           {/* Destination */}
-          <div className="w-full  relative" ref={inputRef}>
+          <div
+            className="relative col-span-1 md:col-span-2 lg:col-span-4"
+            ref={inputRef}
+          >
             <Input
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               placeholder="Enter your destination"
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              autoComplete="off"
+              className="w-full bg-white px-3 sm:px-4 text-sm sm:text-base"
             />
             {destination && suggestions.length > 0 && (
-              <ul className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md max-h-60 overflow-y-auto shadow-md">
+              <ul className="absolute z-50 left-0 right-0 mt-1 bg-white rounded-md max-h-60 overflow-y-auto shadow-lg ring-1 ring-black/10">
                 {suggestions.map((city) => (
                   <li
                     key={city.id}
-                    className="px-3 sm:px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm sm:text-base"
+                    className="px-3 sm:px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm sm:text-base truncate"
                     onClick={() => {
                       setDestination(
                         `${city.name}, ${city.countryCode || city.country}`
@@ -130,19 +136,15 @@ const Hero = () => {
           </div>
 
           {/* Package */}
-          <div className="w-full">
-            <Select onValueChange={setPackageType}>
-              <SelectTrigger className="w-full sm:w-full text-sm sm:text-base">
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
+            <Select onValueChange={setPackageType} value={packageType}>
+              <SelectTrigger className="w-full bg-white text-sm sm:text-base">
                 <SelectValue placeholder="Select Package" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent sideOffset={6}>
                 <SelectGroup>
                   {SelectBudgetOptions.map((opt) => (
-                    <SelectItem
-                      key={opt.id}
-                      value={opt.id}
-                      className="text-sm sm:text-base"
-                    >
+                    <SelectItem key={opt.id} value={opt.id}>
                       {opt.icon} {opt.title}
                     </SelectItem>
                   ))}
@@ -151,75 +153,74 @@ const Hero = () => {
             </Select>
           </div>
 
-          {/* Date Selection Row */}
-          <div className="w-full flex flex-col sm:flex-row gap-3 sm:gap-4">
-            {/* Check In */}
-            <div className="flex-1">
-              <Popover open={checkInOpen} onOpenChange={setCheckInOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between font-normal text-sm sm:text-base py-2 sm:py-3"
-                  >
-                    {checkInDate
-                      ? checkInDate.toLocaleDateString()
-                      : "Check-in"}
-                    <FaChevronDown className="text-xs sm:text-sm" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto overflow-hidden p-0"
-                  align="start"
+          {/* Check In */}
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
+            <Popover open={checkInOpen} onOpenChange={setCheckInOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full  justify-between font-normal text-sm sm:text-base"
                 >
-                  <Calendar
-                    mode="single"
-                    selected={checkInDate}
-                    captionLayout="dropdown"
-                    onSelect={(date) => {
-                      setCheckInDate(date);
-                      setCheckInOpen(false);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+                  {checkInDate ? checkInDate.toLocaleDateString() : "Check-in"}
+                  <FaChevronDown className="text-xs sm:text-sm opacity-70" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0"
+                align="start"
+                sideOffset={8}
+              >
+                <Calendar
+                  mode="single"
+                  selected={checkInDate}
+                  captionLayout="dropdown"
+                  onSelect={(date) => {
+                    setCheckInDate(date);
+                    setCheckInOpen(false);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
-            {/* Check Out */}
-            <div className="flex-1">
-              <Popover open={checkOutOpen} onOpenChange={setCheckOutOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between font-normal text-sm sm:text-base py-2 sm:py-3"
-                  >
-                    {checkOutDate
-                      ? checkOutDate.toLocaleDateString()
-                      : "Check-out"}
-                    <FaChevronDown className="text-xs sm:text-sm" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto overflow-hidden p-0"
-                  align="start"
+          {/* Check Out */}
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
+            <Popover open={checkOutOpen} onOpenChange={setCheckOutOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between font-normal text-sm sm:text-base"
                 >
-                  <Calendar
-                    mode="single"
-                    selected={checkOutDate}
-                    captionLayout="dropdown"
-                    onSelect={(date) => {
-                      setCheckOutDate(date);
-                      setCheckOutOpen(false);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+                  {checkOutDate
+                    ? checkOutDate.toLocaleDateString()
+                    : "Check-out"}
+                  <FaChevronDown className="text-xs sm:text-sm opacity-70" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0"
+                align="start"
+                sideOffset={8}
+              >
+                <Calendar
+                  mode="single"
+                  selected={checkOutDate}
+                  captionLayout="dropdown"
+                  onSelect={(date) => {
+                    setCheckOutDate(date);
+                    setCheckOutOpen(false);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Search Button */}
-          <Button className="w-full sm:w-auto sm:self-center px-6 sm:px-8 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-400 text-white text-sm sm:text-base font-medium rounded-md hover:opacity-90 transition">
-            Search
-          </Button>
+          <div className="col-span-1 md:col-span-2 lg:col-span-2">
+            <Button className="w-full  px-6 sm:px-8 bg-gradient-to-r from-blue-500 to-blue-400 text-white text-sm sm:text-base font-medium rounded-md hover:opacity-90 transition">
+              Search
+            </Button>
+          </div>
         </div>
       </div>
     </section>

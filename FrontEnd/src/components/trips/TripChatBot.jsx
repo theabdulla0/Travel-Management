@@ -5,6 +5,7 @@ import { IoSend } from "react-icons/io5";
 import { SaveTrip, AiGenerateTrip } from "../../features/trips/tripThunk";
 import { useDispatch } from "react-redux";
 import Loader from "../common/Loader";
+import { toast } from "sonner";
 
 function TripChatBot({ setTripPlan }) {
   const [messages, setMessages] = useState([]);
@@ -100,19 +101,18 @@ function TripChatBot({ setTripPlan }) {
 
       // 2. Generate trip via AI
       const aiPlan = await dispatch(AiGenerateTrip(plan)).unwrap();
-      console.log("AI PLAN", aiPlan);
+      console.log("aiPlan", aiPlan);
       setTripPlan(aiPlan);
 
       // 3. Save trip to DB
       try {
         const res = await dispatch(SaveTrip(aiPlan)).unwrap();
         if (res.success) {
-          console.log("trips saved");
+          toast.success("Trip Saved");
         } else {
-          console.log(res.error);
+          toast.error(res.error);
         }
       } catch (saveErr) {
-        console.error("Failed to save trip:", saveErr.response?.data);
         setMessages((prev) => [
           ...prev,
           { role: "assistant", content: "Plan generated but DB save failed." },
@@ -127,7 +127,6 @@ function TripChatBot({ setTripPlan }) {
         )
       );
     } catch (err) {
-      console.error(err);
       setMessages((prev) => [
         ...prev,
         {

@@ -1,5 +1,4 @@
-import { getMe } from "../features/auth/authThunk";
-// import { setUserData } from "../features/auth/authSlicer";
+import { getMe, logout } from "../features/auth/authThunk";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
@@ -7,21 +6,26 @@ function useGetCurrentUser() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUser = async () => {
       try {
-        const res = await dispatch(getMe()).unwrap();
-        // if (res?.data?.user) {
-        // dispatch(setUserData({ user: res.data.user }));
-        // }
-
-        console.log(res.data);
+        await dispatch(getMe()).unwrap();
       } catch (error) {
-        console.error("Error fetching user:", error);
-        // dispatch(logoutUser());
+        if (
+          isMounted &&
+          (error?.status === 401 || error?.message === "Unauthorized")
+        ) {
+          dispatch(logout());
+        }
       }
     };
 
     fetchUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, [dispatch]);
 }
 

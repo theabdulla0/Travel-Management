@@ -42,7 +42,7 @@ export default function ForgotPassword() {
         }
       }
     } catch (error) {
-      console.error("Send OTP error:", error);
+      
       toast.error(error?.message || "Failed to send OTP.");
     } finally {
       setLoading(false);
@@ -67,7 +67,7 @@ export default function ForgotPassword() {
         }
       }
     } catch (error) {
-      console.error("Verify OTP error:", error);
+      
       toast.error(error?.message || "Invalid OTP.");
     } finally {
       setLoading(false);
@@ -94,7 +94,7 @@ export default function ForgotPassword() {
         }
       }
     } catch (err) {
-      console.error("Reset password error:", err);
+      
       toast.error(err?.message || "Something went wrong.");
     } finally {
       setLoading(false);

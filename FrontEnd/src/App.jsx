@@ -1,3 +1,4 @@
+// App.jsx
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/user/Home";
 import CreateTrip from "./pages/trips/CreateTrip";
@@ -8,12 +9,38 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFoundPage from "./pages/NotFoundPage";
 import { Toaster } from "./components/ui/sonner";
-import { React } from "react";
+import { React, useEffect, useRef, useState } from "react";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import { useSelector } from "react-redux";
 import useGetCurrentUser from "./hooks/useGetCurrentUser";
-import ProtectedRoute from "./components/common/ProtectedRoute"; // 👈 create this
+import PageLoading from "./components/PageLoading";
 
 function App() {
-  useGetCurrentUser(); // auto-fetch current user if token exists
+  const [loading, setLoading] = useState(true);
+  const { isFetched } = useSelector((state) => state.auth);
+  const MIN_LOADING_MS = 2000;
+  const startTime = useRef(Date.now());
+
+  useEffect(() => {
+    const finish = () => {
+      const elapsed = Date.now() - startTime.current;
+      const wait = Math.max(MIN_LOADING_MS - elapsed, 0);
+      setTimeout(() => setLoading(false), wait);
+    };
+
+    if (document.readyState === "complete") finish();
+    else {
+      window.addEventListener("load", finish);
+      return () => window.removeEventListener("load", finish);
+    }
+  }, []);
+
+  useGetCurrentUser();
+
+  // Show loader until both page load & user data are ready
+  if (loading || !isFetched) return <PageLoading loading={true} />;
 
   return (
     <div>
@@ -25,7 +52,10 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="*" element={<NotFoundPage />} />
 
-        {/* 🔒 Private */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Private */}
         <Route
           path="/create-trip"
           element={
@@ -52,7 +82,7 @@ function App() {
         />
       </Routes>
 
-      {/* Global toaster for notifications */}
+      {/* Global toaster */}
       <Toaster position="top-right" richColors />
     </div>
   );

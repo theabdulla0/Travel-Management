@@ -20,7 +20,7 @@ export const login = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const res = await API.post("/login", formData);
-
+      console.log(res.data);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Login failed");
@@ -76,9 +76,8 @@ export const verifyOtp = createAsyncThunk(
   "auth/verifyOtp",
   async ({ email, otp }, { rejectWithValue }) => {
     try {
-      console.log("verify OTP Thunk", email, otp);
       const res = await API.post("/verify-otp", { email, otp });
-      console.log("verify OTP Thunk", res.data);
+
       return res.data;
     } catch (err) {
       return rejectWithValue(
