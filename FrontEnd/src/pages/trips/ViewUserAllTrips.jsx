@@ -26,7 +26,6 @@ import TripModal from "@/components/common/TripModal";
 function ViewUserAllTrips() {
   const dispatch = useDispatch();
   const { tripPlan, loading, error } = useSelector((state) => state.trip);
-  const [selectedTrip, setSelectedTrip] = useState(null);
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -36,7 +35,7 @@ function ViewUserAllTrips() {
           toast.success(res.message);
         }
       } catch (err) {
-        toast.error(res.error?.message, "Error fetching trips:");
+        toast.error(err.error?.message, "Error fetching trips:");
       }
     };
     fetchTrips();
