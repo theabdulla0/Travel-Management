@@ -8,14 +8,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 import LayoutCommon from "../../components/common/LayoutCommon";
 import Loader from "@/components/common/Loader";
@@ -38,7 +31,9 @@ function ViewUserAllTrips() {
         toast.error(err.error?.message, "Error fetching trips:");
       }
     };
-    fetchTrips();
+    setTimeout(() => {
+      fetchTrips();
+    }, 1000);
   }, [dispatch]);
   const trips = tripPlan?.data || tripPlan || [];
   return (
