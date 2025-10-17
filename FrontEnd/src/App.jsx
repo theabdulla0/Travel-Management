@@ -1,4 +1,3 @@
-// App.jsx
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/user/Home";
 import CreateTrip from "./pages/trips/CreateTrip";
@@ -9,7 +8,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFoundPage from "./pages/NotFoundPage";
 import { Toaster } from "./components/ui/sonner";
-import { React, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -20,27 +19,36 @@ import PageLoading from "./components/PageLoading";
 function App() {
   const [loading, setLoading] = useState(true);
   const { isFetched } = useSelector((state) => state.auth);
+
   const MIN_LOADING_MS = 2000;
   const startTime = useRef(Date.now());
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     const finish = () => {
       const elapsed = Date.now() - startTime.current;
       const wait = Math.max(MIN_LOADING_MS - elapsed, 0);
-      setTimeout(() => setLoading(false), wait);
+      timeoutRef.current = setTimeout(() => setLoading(false), wait);
     };
 
-    if (document.readyState === "complete") finish();
-    else {
+    if (document.readyState === "complete") {
+      finish();
+    } else {
       window.addEventListener("load", finish);
-      return () => window.removeEventListener("load", finish);
     }
+
+    return () => {
+      window.removeEventListener("load", finish);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, []);
 
   useGetCurrentUser();
 
-  // Show loader until both page load & user data are ready
-  if (loading || !isFetched) return <PageLoading loading={true} />;
+  const showLoader = loading || !isFetched;
+  if (showLoader) {
+    return <PageLoading loading={true} text="Please wait..." />;
+  }
 
   return (
     <div>
